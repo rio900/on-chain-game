@@ -122,6 +122,11 @@ pub mod pallet {
             /// The account who set the new value.
             who: T::AccountId,
         },
+
+        TestEvent {
+            /// The new value set.
+            something: u32,
+        },
     }
 
     /// Errors that can be returned by this pallet.
@@ -150,8 +155,14 @@ pub mod pallet {
             let id = AsteroidIds::<T>::get();
 
             AsteroidIds::<T>::put(id + 1);
-            let coord = Coord { x: 0, y: 0 };
+
+            let coord = Coord {
+                x: Self::get_random_x(),
+                y: Self::get_random_y(),
+            };
             Asyeroids::<T>::insert(id, (coord, now));
+
+            Self::deposit_event(Event::TestEvent { something: 42 });
 
             runtime_print!(
                 "[on_init] Test Asteroid #{:?} spawned at block {:?}",
@@ -229,6 +240,16 @@ pub mod pallet {
                     Ok(())
                 }
             }
+        }
+    }
+
+    impl<T: Config> Pallet<T> {
+        pub fn get_random_x() -> u32 {
+            32
+        }
+
+        pub fn get_random_y() -> u32 {
+            64
         }
     }
 }
