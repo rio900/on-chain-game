@@ -106,7 +106,7 @@ pub mod pallet {
     pub type AsteroidIds<T> = StorageValue<_, u64, ValueQuery>;
 
     #[pallet::storage]
-    pub type Asyeroids<T: Config> =
+    pub type Asteroids<T: Config> =
         StorageMap<_, Twox64Concat, AsteroidId, (Coord, BlockNumberFor<T>), OptionQuery>;
 
     ///	The `generate_deposit` macro generates a function on `Pallet` called `deposit_event` which
@@ -143,15 +143,18 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_initialize(now: BlockNumberFor<T>) -> Weight {
-            runtime_print!("[on_init] Started");
+           
 
             let mut weight = Weight::zero();
 
             let id = AsteroidIds::<T>::get();
 
             AsteroidIds::<T>::put(id + 1);
-            let coord = Coord { x: 0, y: 0 };
-            Asyeroids::<T>::insert(id, (coord, now));
+            let coord = Coord {
+                x: Self::get_random_x(),
+                y: Self::get_random_y(),
+            };
+            Asteroids::<T>::insert(id, (coord, now));
 
             runtime_print!(
                 "[on_init] Test Asteroid #{:?} spawned at block {:?}",
@@ -231,4 +234,60 @@ pub mod pallet {
             }
         }
     }
+
+    impl<T: Config> Pallet<T> {
+    pub fn get_random_x() -> u32 {
+        runtime_print!("[on_init] get_random_x");
+        
+        // Get both the block number and block hash for more entropy
+        let block_number = <frame_system::Pallet<T>>::block_number();
+        let block_hash = <frame_system::Pallet<T>>::block_hash(block_number);
+        
+        // Combine data sources for better randomness
+        let mut combined = block_number.using_encoded(|b| b.to_vec());
+        combined.extend_from_slice(&block_hash.as_ref());
+        
+        // Generate value between 0 and 51
+        let mut value: u32 = 0;
+        if !combined.is_empty() {
+            // Use multiple bytes for better distribution
+            for i in 0..combined.len().min(4) {
+                value = value.wrapping_add(combined[i] as u32 * (i as u32 + 1));
+            }
+        }
+        
+        // Ensure the value is between 0 and 51
+        let result = value % 52;
+        
+        runtime_print!("[on_init] x:{:?}", result);
+        result
+    }
+    
+    pub fn get_random_y() -> u32 {
+        runtime_print!("[on_init] get_random_y");
+        
+        // Get both the block number and block hash for more entropy
+        let block_number = <frame_system::Pallet<T>>::block_number();
+        let block_hash = <frame_system::Pallet<T>>::block_hash(block_number);
+        
+        // Combine data sources for better randomness
+        let mut combined = block_number.using_encoded(|b| b.to_vec());
+        combined.extend_from_slice(&block_hash.as_ref());
+        
+        // Generate value between 0 and 51
+        let mut value: u32 = 0;
+        if !combined.is_empty() {
+            // Use multiple bytes for better distribution
+            for i in 0..combined.len().min(4) {
+                value = value.wrapping_add(combined[i] as u32 * (i as u32 + 1));
+            }
+        }
+        
+        // Ensure the value is between 0 and 51
+        let result = value % 52;
+        
+        runtime_print!("[on_init] y:{:?}", result);
+        result
+    }
+}
 }
