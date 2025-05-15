@@ -181,6 +181,7 @@ To get a local copy up and running, follow these simple example steps:
 ## Future Releases
 
 <ol>
+  <li>Connect to the Polkadot Hub to store NFTs</li>
   <li>Bigger maps, more players</li>
   <li>Collect custom themes and ship upgrades as NFTs</li>
   <li>Extend on all platforms, including desktop</li>
@@ -191,6 +192,26 @@ To get a local copy up and running, follow these simple example steps:
 <!-- MEET THE DEVS -->
 
 ## Meet The Devs
+
+<img src="static/images/team.jpeg" alt="Team">
+
+The team first connected at Consensus 2025, sparking a collaboration that led to the creation of DotStrikers!
+
+On our own, we do some pretty cool things too!
+
+Roman Samchuk is a \_
+<br />
+[![LinkedIn][LinkedIn]][LinkedIn-roman]
+[![GitHub][GitHub]][GitHub-roman]
+
+Oyonika Samazder is a \_
+<br />
+[![LinkedIn][LinkedIn]][LinkedIn-oyonika]
+[![GitHub][GitHub]][GitHub-oyonika]
+
+Sami Ibrahim is a \_
+[![LinkedIn][LinkedIn]][LinkedIn-sami]
+[![GitHub][GitHub]][GitHub-sami]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -212,7 +233,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 
 ## Contact
 
-Oyonika - [@oyonika](https://www.linkedin.com/in/oyonika) - oyonika@hotmail.com
+Oyonika - [@oyonika](https://www.linkedin.com/in/oyonika)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -239,3 +260,11 @@ This project was made possible thanks to the support of some incredible platform
 [Unity-url]: https://unity.com/games
 [Polkadot]: https://img.shields.io/badge/polkadot-e5047a?style=for-the-badge&logo=solidity&logoColor=white
 [Polkadot-url]: https://docs.polkadot.com/develop/networks/
+[LinkedIn]: https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white
+[LinkedIn-roman]: https://www.linkedin.com/in/roman-samchuk/
+[LinkedIn-oyonika]: https://www.linkedin.com/in/oyonika/
+[LinkedIn-sami]: https://www.linkedin.com/in/samibr/
+[GitHub]: https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white
+[GitHub-roman]: https://github.com/rio900
+[GitHub-oyonika]: https://github.com/oyonika
+[GitHub-sami]: https://github.com/sibra29
