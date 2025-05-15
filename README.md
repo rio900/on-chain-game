@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/rio900/on-chain-game">
-    <img src="static/images/logo.png" width="300" height="300" alt="Logo">
+    <img src="static/images/logo.png" width="200" height="180" alt="Logo">
   </a>
 
   <h3 align="center">DotStriker!</h3>
@@ -47,7 +47,7 @@
     <li><a href="#roadmap">Roadmap</a></li>
     <li><a href="#future-releases">Future Releases</a></li>
     <li>
-      <a href="#backstory">Dev Backstory</a>
+      <a href="#meet-the-devs">Meet The Devs</a>
     </li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
@@ -76,8 +76,6 @@ The Striker who collects the most, wins.
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With ♡
-
-This section should list any major frameworks/libraries used to bootstrap your project. Leave any add-ons/plugins for the acknowledgements section. Here are a few examples.
 
 [![Rust][Rust]][Rust-url]
 [![Unity][Unity]][Unity-url]
@@ -131,8 +129,8 @@ Watch our developers talk a little bit about the idea and how it was built:
 
 Like many ambitious projects, Dotstrikers! began as a humble proof-of-concept napkin sketch — here’s a glimpse at the game's earliest design ideas.
 
-<img src="static/images/wf_registration.png"  alt="Registration">
-<img src="static/images/wf_gameplay.png" width="800" height="300" alt="Gameplay">
+<img src="static/images/wf_registration.png" height=600 alt="Registration">
+<img src="static/images/wf_gameplay.png" width="600" alt="Gameplay">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -143,8 +141,6 @@ Like many ambitious projects, Dotstrikers! began as a humble proof-of-concept na
 To get a local copy up and running, follow these simple example steps:
 
 ### Prerequisites
-
-This is an example of how to list things you need to use the software and how to install them.
 
 - npm
   ```sh
@@ -180,14 +176,31 @@ This is an example of how to list things you need to use the software and how to
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+<!-- FUTURE RELEASES -->
+
+## Future Releases
+
+<ol>
+  <li>Bigger maps, more players</li>
+  <li>Collect custom themes and ship upgrades as NFTs</li>
+  <li>Extend on all platforms, including desktop</li>
+</ol>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MEET THE DEVS -->
+
+## Meet The Devs
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 <!-- CONTRIBUTING -->
 
 ## Contributing
 
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**. 🫶🏻
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
-Don't forget to give the project a star! Thanks again!
+If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement". Don't forget to give the project a star!
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -207,16 +220,13 @@ Oyonika - [@oyonika](https://www.linkedin.com/in/oyonika) - oyonika@hotmail.com
 
 ## Acknowledgments
 
-Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off!
+This project was made possible thanks to the support of some incredible platforms, collaborators and powerful open-source tools.
 
-- [Choose an Open Source License](https://choosealicense.com)
-- [GitHub Emoji Cheat Sheet](https://www.webpagefx.com/tools/emoji-cheat-sheet)
-- [Malven's Flexbox Cheatsheet](https://flexbox.malven.co/)
-- [Malven's Grid Cheatsheet](https://grid.malven.co/)
-- [Img Shields](https://shields.io)
-- [GitHub Pages](https://pages.github.com)
-- [Font Awesome](https://fontawesome.com)
-- [React Icons](https://react-icons.github.io/react-icons/search)
+- [Rust](https://www.rust-lang.org/)
+- [Unity](https://unity.com/solutions/programming)
+- [Polkadot](https://polkadot.com/platform/sdk/)
+- [EasyA](https://www.easya.io/)
+- [Consensus 2025](https://consensus2025.coindesk.com/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
