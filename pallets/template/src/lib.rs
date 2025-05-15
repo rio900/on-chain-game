@@ -129,6 +129,8 @@ pub mod pallet {
         type WeightInfo: WeightInfo;
     }
 
+    type UserAccount<T> = <T as frame_system::Config>::AccountId;
+
     #[pallet::storage]
     pub type Something<T> = StorageValue<_, u32>;
 
@@ -140,13 +142,12 @@ pub mod pallet {
         StorageMap<_, Twox64Concat, AsteroidId, (Coord, BlockNumberFor<T>), OptionQuery>;
 
     #[pallet::storage]
-    pub type Flights<T: Config> = StorageMap<
-        _,
-        Twox64Concat,
-        <T as frame_system::Config>::AccountId,
-        Flight<BlockNumberFor<T>>,
-        OptionQuery,
-    >;
+    pub type Flights<T: Config> =
+        StorageMap<_, Twox64Concat, UserAccount<T>, Flight<BlockNumberFor<T>>, OptionQuery>;
+
+    #[pallet::storage]
+    pub type ActiveShips<T: Config> =
+        StorageMap<_, Twox64Concat, UserAccount<T>, Coord, OptionQuery>;
 
     ///	The `generate_deposit` macro generates a function on `Pallet` called `deposit_event` which
     /// will convert the event type of your pallet into `RuntimeEvent` (declared in the pallet's
@@ -174,6 +175,13 @@ pub mod pallet {
 
         AsteroidRemoved {
             id: AsteroidId,
+        },
+
+        FlightStarted {
+            owner: T::AccountId,
+            from: Coord,
+            to: Coord,
+            end: BlockNumberFor<T>,
         },
     }
 
@@ -244,10 +252,21 @@ pub mod pallet {
                 }
             }
             AsteroidIds::<T>::put(id);
+            weight += T::DbWeight::get().writes(1);
 
-            Self::deposit_event(Event::TestEvent {
-                something: id as u32,
-            });
+            for (user, flight) in Flights::<T>::iter() {
+                if flight.end < now {
+                    ActiveShips::<T>::insert(user.clone(), flight.to.clone());
+                    Flights::<T>::remove(user.clone());
+
+                    weight += T::DbWeight::get().writes(2);
+                    runtime_print!("[on_init] Flight removed {:?}", user);
+                }
+            }
+
+            // Self::deposit_event(Event::TestEvent {
+            //     something: id as u32,
+            // });
 
             //  weight += T::DbWeight::get().reads_writes(1, 2);
 
@@ -275,29 +294,49 @@ pub mod pallet {
         /// error if it isn't. Learn more about origins here: <https://docs.substrate.io/build/origins/>
         #[pallet::call_index(0)]
         #[pallet::weight(T::WeightInfo::do_something())]
-        pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
+        pub fn do_something(origin: OriginFor<T>, coord: Coord) -> DispatchResult {
             // Check that the extrinsic was signed and get the signer.
             let who = ensure_signed(origin)?;
 
-            // Update storage.
-            Something::<T>::put(something);
+            if Flights::<T>::contains_key(who.clone()) {
+                return Err(Error::<T>::NoneValue.into());
+            }
+
+            let mut from_coord = Coord { x: 0, y: 0 };
+
+            if !ActiveShips::<T>::contains_key(who.clone()) {
+                ActiveShips::<T>::insert(who.clone(), from_coord.clone());
+                runtime_print!("[on_init] Active ship added {:?}", who);
+                // return Err(Error::<T>::NoneValue.into());
+            } else {
+                let ship_coord = ActiveShips::<T>::get(who.clone()).unwrap();
+                from_coord = ship_coord;
+            }
 
             let block_number = <frame_system::Pallet<T>>::block_number();
+            let end_block = block_number + 2u32.into();
             Flights::<T>::insert(
                 who.clone(),
                 Flight {
-                    from: Coord { x: 0, y: 0 },
-                    to: Coord { x: 0, y: 0 },
+                    from: from_coord.clone(),
+                    to: coord.clone(),
                     start: block_number.clone(),
-                    end: block_number + 2u32.into(),
+
+                    end: end_block.clone(),
                 },
             );
             runtime_print!("[on_init] Flight added {:?}", who);
 
-            Self::deposit_event(Event::SomethingStored {
-                something,
-                who: who.clone(),
+            Self::deposit_event(Event::FlightStarted {
+                owner: who.clone(),
+                from: from_coord.clone(),
+                to: coord.clone(),
+                end: end_block,
             });
+            // Self::deposit_event(Event::SomethingStored {
+            //     something,
+            //     who: who.clone(),
+            // });
 
             // Return a successful `DispatchResult`
             Ok(())
