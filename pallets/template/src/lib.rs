@@ -86,7 +86,7 @@ pub type AsteroidId = u64;
 // All pallet logic is defined in its own module and must be annotated by the `pallet` attribute.
 #[frame_support::pallet]
 pub mod pallet {
-    use core::result;
+    use core::{hash, result};
 
     // Import various useful types required by all FRAME pallets.
     use super::*;
@@ -144,6 +144,10 @@ pub mod pallet {
             resource_id: AsteroidId,
             coord: Coord,
         },
+
+        AsteroidRemoved {
+            id: AsteroidId,
+        },
     }
 
     /// Errors that can be returned by this pallet.
@@ -167,8 +171,21 @@ pub mod pallet {
         fn on_initialize(now: BlockNumberFor<T>) -> Weight {
             let mut weight = Weight::zero();
 
-            let mut id = AsteroidIds::<T>::get();
+            for (as_id, (coord, ttl_block)) in Asteroids::<T>::iter() {
+                if ttl_block < now {
+                    Asteroids::<T>::remove(as_id);
 
+                    weight += T::DbWeight::get().writes(1);
+                    Self::deposit_event(Event::AsteroidRemoved { id: as_id });
+                    runtime_print!(
+                        "[on_initialize] remove asteroid {:?} coord: {:?}",
+                        as_id,
+                        coord
+                    );
+                }
+            }
+
+            let mut id = AsteroidIds::<T>::get();
             // Let’s treat it as a constant for now
             // until it becomes a real constant after refactoring
             let max_asteroids_count = 10;
@@ -177,13 +194,18 @@ pub mod pallet {
 
             let difference = max_asteroids_count - asteroids_count;
 
+            // One more constant I need to remove from here
+            let ttl_const = 5;
             if difference > 0 {
                 for i in 0..difference {
                     let coord: Coord = Coord {
                         x: Self::get_random_x(50, i as u32),
                         y: Self::get_random_y(50, i as u32),
                     };
-                    Asteroids::<T>::insert(id, (coord.clone(), now));
+
+                    let ttl_block = now + (ttl_const + asteroids_count as u32).into();
+
+                    Asteroids::<T>::insert(id, (coord.clone(), ttl_block));
                     runtime_print!("[on_init] Asteroid #{:?} spawned at coord {:?}", id, coord);
                     Self::deposit_event(Event::AsteroidSpawned {
                         resource_id: id,
@@ -277,34 +299,33 @@ pub mod pallet {
     impl<T: Config> Pallet<T> {
         // Don’t do that. it’s a bad practice
         // I’m just gonna harry up
-        pub fn get_random(seed: u32, max: u32) -> u32 {
-            let block_number = <frame_system::Pallet<T>>::block_number();
-            let block_hash = <frame_system::Pallet<T>>::block_hash(block_number);
+        fn get_hash_u32() -> u32 {
+            let hash = <frame_system::Pallet<T>>::parent_hash();
+            let bytes = hash.as_ref();
+            u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
+        }
 
-            let mut combined = block_number.using_encoded(|b| b.to_vec());
-            combined.extend_from_slice(&block_hash.as_ref());
-            combined.extend_from_slice(&seed.to_le_bytes());
-
-            let mut value: u32 = 0;
-            if !combined.is_empty() {
-                for i in 0..combined.len().min(4) {
-                    value = value.wrapping_add(combined[i] as u32 * (i as u32 + 1));
-                }
+        fn get_random(seed: u32, skip: u32, max: u32) -> u32 {
+            let mut local_skip = skip;
+            if skip == 0 {
+                local_skip = 1;
             }
 
-            let result = (value + seed) % max;
-            result
+            let new_seed = seed / local_skip;
+            new_seed % max
         }
 
         pub fn get_random_x(max: u32, index: u32) -> u32 {
-            let result = Self::get_random(1 + index, max);
+            let hash = Self::get_hash_u32();
+            let result = Self::get_random(hash, index, max);
             runtime_print!("[on_init] x:{:?}", result);
 
             result
         }
 
         pub fn get_random_y(max: u32, index: u32) -> u32 {
-            let result = Self::get_random(2 + (index * 2), max);
+            let hash = Self::get_hash_u32();
+            let result = Self::get_random(hash, 100 + index, max);
             runtime_print!("[on_init] y:{:?}", result);
 
             result
