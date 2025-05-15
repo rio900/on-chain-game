@@ -39,7 +39,7 @@
 // We make sure this pallet uses `no_std` for compiling to Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use codec::{Decode, Encode, MaxEncodedLen};
+use codec::{Decode, DecodeWithMemTracking, Encode, MaxEncodedLen};
 // Re-export pallet items so that they can be accessed from the crate namespace.
 pub use pallet::*;
 
@@ -65,7 +65,17 @@ pub use weights::*;
 use frame_support::sp_runtime::RuntimeDebug;
 use scale_info::TypeInfo;
 
-#[derive(Encode, Decode, MaxEncodedLen, Clone, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+#[derive(
+    Encode,
+    Decode,
+    DecodeWithMemTracking,
+    MaxEncodedLen,
+    Clone,
+    PartialEq,
+    Eq,
+    RuntimeDebug,
+    TypeInfo,
+)]
 pub struct Coord {
     x: u32,
     y: u32,
@@ -129,6 +139,11 @@ pub mod pallet {
             /// The new value set.
             something: u32,
         },
+
+        AsteroidSpawned {
+            resource_id: AsteroidId,
+            coord: Coord,
+        },
     }
 
     /// Errors that can be returned by this pallet.
@@ -152,23 +167,40 @@ pub mod pallet {
         fn on_initialize(now: BlockNumberFor<T>) -> Weight {
             let mut weight = Weight::zero();
 
-            let id = AsteroidIds::<T>::get();
+            let mut id = AsteroidIds::<T>::get();
 
-            AsteroidIds::<T>::put(id + 1);
-            let coord = Coord {
-                x: Self::get_random_x(50, 0),
-                y: Self::get_random_y(50, 0),
-            };
-            Asteroids::<T>::insert(id, (coord, now));
+            // Let’s treat it as a constant for now
+            // until it becomes a real constant after refactoring
+            let max_asteroids_count = 10;
 
-            Self::deposit_event(Event::TestEvent { something: 42 });
+            let asteroids_count = Asteroids::<T>::iter().count();
 
-            runtime_print!(
-                "[on_init] Test Asteroid #{:?} spawned at block {:?}",
-                id,
-                now
-            );
-            weight += T::DbWeight::get().reads_writes(1, 2);
+            let difference = max_asteroids_count - asteroids_count;
+
+            if difference > 0 {
+                for i in 0..difference {
+                    let coord: Coord = Coord {
+                        x: Self::get_random_x(50, i as u32),
+                        y: Self::get_random_y(50, i as u32),
+                    };
+                    Asteroids::<T>::insert(id, (coord.clone(), now));
+                    runtime_print!("[on_init] Asteroid #{:?} spawned at coord {:?}", id, coord);
+                    Self::deposit_event(Event::AsteroidSpawned {
+                        resource_id: id,
+                        coord: coord.clone(),
+                    });
+
+                    id += 1;
+                    weight += T::DbWeight::get().writes(1);
+                }
+            }
+            AsteroidIds::<T>::put(id);
+
+            Self::deposit_event(Event::TestEvent {
+                something: id as u32,
+            });
+
+            //  weight += T::DbWeight::get().reads_writes(1, 2);
 
             weight
         }
@@ -260,7 +292,7 @@ pub mod pallet {
                 }
             }
 
-            let result = value + (value / seed) % max;
+            let result = (value + seed) % max;
             result
         }
 
