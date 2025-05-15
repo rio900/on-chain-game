@@ -138,41 +138,62 @@ Like many ambitious projects, Dotstrikers! began as a humble proof-of-concept na
 
 <!-- GETTING STARTED -->
 
-## Getting Started
 
-To get a local copy up and running, follow these simple example steps:
+## 🚀 Getting Started with on-chain-game
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
+This guide walks you through setting up and running the on-chain-game node locally for development and testing.
 
-- npm
-  ```sh
-  npm install npm@latest -g
-  ```
+✅ Prerequisites
+
+Before you begin, ensure you have the following installed:
+* Rust (with rustup): Install from https://rustup.rs
+* Substrate dependencies: Follow the official Substrate installation guide https://docs.substrate.io/install/
+* Git: For cloning the repository
+
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
-   ```sh
-   git clone https://github.com/github_username/repo_name.git
-   ```
-3. Install NPM packages
-   ```sh
-   npm install
-   ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = "ENTER YOUR API";
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ```
+📥 1. Clone the Repository
+Clone the repository to your local machine:
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+git clone https://github.com/rio900/on-chain-game.git
+
+<pre>
+cd on-chain-game
+</pre>
+🛠️ 2. Build the Project
+Build the project in release mode using Cargo:
+
+<pre>
+cargo build --release
+</pre>
+
+This command compiles the node with optimizations, resulting in a faster executable.
+
+▶️ 3. Run the Node
+After building, you can start a local development node with runtime debug logging enabled:
+
+<pre>
+RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --execution=wasm
+</pre>
+
+Explanation of the command:
+
+* RUST_LOG=runtime=debug: Enables detailed logging for the runtime module, useful for debugging.
+* ./target/release/solochain-template-node: Executes the compiled node binary.
+*	--dev: Runs the node in development mode, using temporary keys and in-memory state.
+*	--execution=wasm: Forces the node to execute using WebAssembly for runtime validation.
+
+🧪 4. Interact with the Node
+Once the node is running, you can interact with it using:
+	•	Polkadot.js Apps: Connect via https://polkadot.js.org/apps and select the local node.
+	•	Substrate Front-End Template: Clone and run https://github.com/substrate-developer-hub/substrate-front-end-template to interact with your node.
+
+🛠️ 5. Customize and Develop
+Explore the runtime modules in the runtime directory to understand and modify the game’s logic. You can add new pallets or modify existing ones to extend functionality.
+
 
 <!-- ROADMAP -->
 
