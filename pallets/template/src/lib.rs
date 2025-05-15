@@ -81,6 +81,24 @@ pub struct Coord {
     y: u32,
 }
 
+#[derive(
+    Encode,
+    Decode,
+    DecodeWithMemTracking,
+    MaxEncodedLen,
+    Clone,
+    PartialEq,
+    Eq,
+    RuntimeDebug,
+    TypeInfo,
+)]
+pub struct Flight<BlockNumber> {
+    pub from: Coord,
+    pub to: Coord,
+    pub start: BlockNumber,
+    pub end: BlockNumber,
+}
+
 pub type AsteroidId = u64;
 
 // All pallet logic is defined in its own module and must be annotated by the `pallet` attribute.
@@ -120,6 +138,15 @@ pub mod pallet {
     #[pallet::storage]
     pub type Asteroids<T: Config> =
         StorageMap<_, Twox64Concat, AsteroidId, (Coord, BlockNumberFor<T>), OptionQuery>;
+
+    #[pallet::storage]
+    pub type Flights<T: Config> = StorageMap<
+        _,
+        Twox64Concat,
+        <T as frame_system::Config>::AccountId,
+        Flight<BlockNumberFor<T>>,
+        OptionQuery,
+    >;
 
     ///	The `generate_deposit` macro generates a function on `Pallet` called `deposit_event` which
     /// will convert the event type of your pallet into `RuntimeEvent` (declared in the pallet's
@@ -203,7 +230,7 @@ pub mod pallet {
                         y: Self::get_random_y(50, i as u32),
                     };
 
-                    let ttl_block = now + (ttl_const + asteroids_count as u32).into();
+                    let ttl_block = now + (ttl_const + i as u32).into();
 
                     Asteroids::<T>::insert(id, (coord.clone(), ttl_block));
                     runtime_print!("[on_init] Asteroid #{:?} spawned at coord {:?}", id, coord);
@@ -255,8 +282,22 @@ pub mod pallet {
             // Update storage.
             Something::<T>::put(something);
 
-            // Emit an event.
-            Self::deposit_event(Event::SomethingStored { something, who });
+            let block_number = <frame_system::Pallet<T>>::block_number();
+            Flights::<T>::insert(
+                who.clone(),
+                Flight {
+                    from: Coord { x: 0, y: 0 },
+                    to: Coord { x: 0, y: 0 },
+                    start: block_number.clone(),
+                    end: block_number + 2u32.into(),
+                },
+            );
+            runtime_print!("[on_init] Flight added {:?}", who);
+
+            Self::deposit_event(Event::SomethingStored {
+                something,
+                who: who.clone(),
+            });
 
             // Return a successful `DispatchResult`
             Ok(())
