@@ -76,6 +76,8 @@ pub type AsteroidId = u64;
 // All pallet logic is defined in its own module and must be annotated by the `pallet` attribute.
 #[frame_support::pallet]
 pub mod pallet {
+    use core::result;
+
     // Import various useful types required by all FRAME pallets.
     use super::*;
     use frame_support::{pallet_prelude::*, runtime_print};
@@ -148,16 +150,14 @@ pub mod pallet {
     #[pallet::hooks]
     impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
         fn on_initialize(now: BlockNumberFor<T>) -> Weight {
-           
-
             let mut weight = Weight::zero();
 
             let id = AsteroidIds::<T>::get();
 
             AsteroidIds::<T>::put(id + 1);
             let coord = Coord {
-                x: Self::get_random_x(),
-                y: Self::get_random_y(),
+                x: Self::get_random_x(50, 0),
+                y: Self::get_random_y(50, 0),
             };
             Asteroids::<T>::insert(id, (coord, now));
 
@@ -243,58 +243,39 @@ pub mod pallet {
     }
 
     impl<T: Config> Pallet<T> {
-    pub fn get_random_x() -> u32 {
-        runtime_print!("[on_init] get_random_x");
-        
-        // Get both the block number and block hash for more entropy
-        let block_number = <frame_system::Pallet<T>>::block_number();
-        let block_hash = <frame_system::Pallet<T>>::block_hash(block_number);
-        
-        // Combine data sources for better randomness
-        let mut combined = block_number.using_encoded(|b| b.to_vec());
-        combined.extend_from_slice(&block_hash.as_ref());
-        
-        // Generate value between 0 and 51
-        let mut value: u32 = 0;
-        if !combined.is_empty() {
-            // Use multiple bytes for better distribution
-            for i in 0..combined.len().min(4) {
-                value = value.wrapping_add(combined[i] as u32 * (i as u32 + 1));
+        // Don’t do that. it’s a bad practice
+        // I’m just gonna harry up
+        pub fn get_random(seed: u32, max: u32) -> u32 {
+            let block_number = <frame_system::Pallet<T>>::block_number();
+            let block_hash = <frame_system::Pallet<T>>::block_hash(block_number);
+
+            let mut combined = block_number.using_encoded(|b| b.to_vec());
+            combined.extend_from_slice(&block_hash.as_ref());
+            combined.extend_from_slice(&seed.to_le_bytes());
+
+            let mut value: u32 = 0;
+            if !combined.is_empty() {
+                for i in 0..combined.len().min(4) {
+                    value = value.wrapping_add(combined[i] as u32 * (i as u32 + 1));
+                }
             }
+
+            let result = value + (value / seed) % max;
+            result
         }
-        
-        // Ensure the value is between 0 and 51
-        let result = value % 52;
-        
-        runtime_print!("[on_init] x:{:?}", result);
-        result
-    }
-    
-    pub fn get_random_y() -> u32 {
-        runtime_print!("[on_init] get_random_y");
-        
-        // Get both the block number and block hash for more entropy
-        let block_number = <frame_system::Pallet<T>>::block_number();
-        let block_hash = <frame_system::Pallet<T>>::block_hash(block_number);
-        
-        // Combine data sources for better randomness
-        let mut combined = block_number.using_encoded(|b| b.to_vec());
-        combined.extend_from_slice(&block_hash.as_ref());
-        
-        // Generate value between 0 and 51
-        let mut value: u32 = 0;
-        if !combined.is_empty() {
-            // Use multiple bytes for better distribution
-            for i in 0..combined.len().min(4) {
-                value = value.wrapping_add(combined[i] as u32 * (i as u32 + 1));
-            }
+
+        pub fn get_random_x(max: u32, index: u32) -> u32 {
+            let result = Self::get_random(1 + index, max);
+            runtime_print!("[on_init] x:{:?}", result);
+
+            result
         }
-        
-        // Ensure the value is between 0 and 51
-        let result = value % 52;
-        
-        runtime_print!("[on_init] y:{:?}", result);
-        result
+
+        pub fn get_random_y(max: u32, index: u32) -> u32 {
+            let result = Self::get_random(2 + (index * 2), max);
+            runtime_print!("[on_init] y:{:?}", result);
+
+            result
+        }
     }
-}
 }
