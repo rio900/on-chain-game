@@ -115,12 +115,14 @@ Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/D
 
 Watch our developers talk a little bit about the idea and how it was built:
 
-<video src="https://youtube.com/shorts/fRfvrtR77ak" controls></video>
+<video src="https://youtube.com/shorts/fRfvrtR77ak" controls />
+If for some reason, you cannot see the preview, [here's](https://youtube.com/shorts/fRfvrtR77ak) the link.
 
 ### Playing DotStriker!
 
 Watch a quick demo of how DotStriker works:
-<video src="https://youtu.be/jCJ-B3NH390" controls></video>
+<video src="https://youtu.be/jCJ-B3NH390" controls />
+If for some reason, you cannot see the preview, [here's](https://youtu.be/jCJ-B3NH390) the link.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
