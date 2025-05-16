@@ -4,7 +4,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/rio900/on-chain-game">
-    <img src="static/images/logo.png" width="200" height="180" alt="Logo">
+    <img src="static/logo.png" width="200" height="180" alt="Logo">
   </a>
 
   <h3 align="center">DotStriker!</h3>
@@ -58,7 +58,7 @@
 
 ## About The Project
 
- <img src="static/images/screenshot_2.jpeg" alt="Gameplay">
+ <img src="static/screenshot_2.jpeg" alt="Gameplay">
 
 DotStriker! is a real-time, multiplayer coin race — pilots control on-chain ships, collect coins across the Polkadot-powered arena, and battle for dominance.
 
@@ -135,14 +135,14 @@ If you cannot see the preview on your browser, [here](https://youtu.be/jCJ-B3NH3
 
 ### Screenshots
 
-<img src="static/images/screenshot_1.jpeg" alt="Registration">
+<img src="static/screenshot_1.jpeg" alt="Registration">
 
 ### Wireframes
 
 Like many ambitious projects, Dotstrikers! began as a humble proof-of-concept napkin sketch — here’s a glimpse at the game's earliest design ideas.
 
-<img src="static/images/wf_registration.png" height=600 alt="Registration">
-<img src="static/images/wf_gameplay.png" width="600" alt="Gameplay">
+<img src="static/wf_registration.png" height=600 alt="Registration">
+<img src="static/wf_gameplay.png" width="600" alt="Gameplay">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -152,7 +152,7 @@ Like many ambitious projects, Dotstrikers! began as a humble proof-of-concept na
 
 Given that we only had 2 odd days to develop the entire project, we decided to do a MoSCoW style planning to outline what features we wanted to showcase:
 
-<img src="static/images/roadmap.png" alt="Team">
+<img src="static/roadmap.png" alt="Team">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -176,7 +176,7 @@ Given that we only had 2 odd days to develop the entire project, we decided to d
 
 ## Meet The Devs
 
-<img src="static/images/team.jpeg" alt="Team">
+<img src="static/team.jpeg" alt="Team">
 
 The team first connected at Consensus 2025, sparking a collaboration that led to the creation of DotStrikers!
 
