@@ -160,14 +160,15 @@ Given that we only had 2 odd days to develop the entire project, we decided to d
 
 ## Future Releases
 
-<ol>
-  <li>Connect to the Polkadot Hub to store NFTs</li>
-  <li>Bigger maps, more players</li>
-  <li>Add obstacles to slow down ship or end game</li>
-  <li>Add timed levels</li>
-  <li>Collect custom themes and ship upgrades as NFTs</li>
-  <li>Extend on all platforms, including desktop</li>
-</ol>
+
+<ul>
+  <li><b>🪐 Polkadot Hub Integration: </b> Seamlessly connect to the Polkadot ecosystem to store in-game NFTs such as ships, themes, and achievements—secure, portable, and fully on-chain.</li>
+<li><b>🌌 Larger Maps & More Players:</b> Scale the game universe with expanded map regions and support for high-concurrency multiplayer sessions, enabling chaotic coin races and team-based missions.</li>
+<li><b>☄️ Dynamic Obstacles & Hazards:</b> Introduce asteroids, black holes, and trap zones that challenge navigation and add high-stakes decision-making—impacting speed, score, or survival.</li>
+<li><b>⏱️ Timed Levels & Score Pressure: </b> Add countdown-based challenges that reward fast, strategic gameplay—creating replay value and leaderboards based on time efficiency.</li>
+<li><b>🚀 NFT-Based Customization & Upgrades: </b> Allow players to collect, trade, and equip unique ships, skins, and boost modules—each minted as NFTs with in-game and marketplace value.</li>
+<li><b>🖥️ Cross-Platform Expansion: </b> Optimize for multiple platforms, including desktop, mobile, and browser environments—ensuring broader reach and more accessible play across devices.</li>
+</ul>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
