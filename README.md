@@ -67,6 +67,11 @@ The Striker who collects the most, wins.
 
 Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnnrlCwj8/4VH96olgLoY4KJUq1WA7uA/view?utm_content=DAGnnrlCwj8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h8acaace07d)!
 
+
+Relevant connected repos for development:
+1. https://github.com/rio900/game-client
+2. https://github.com/sibra29/game-registration-contract
+
 #### 🎮 Features:
 
 - 🚀 Real-time multiplayer combat in a cosmic arena
