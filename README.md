@@ -58,7 +58,7 @@
 
 ## About The Project
 
- <img src="static/images/logo.png" width="800" height="300" alt="Gameplay">
+ <img src="static/images/screenshot_2.jpeg" alt="Gameplay">
 
 DotStriker! is a real-time, multiplayer coin race — pilots control on-chain ships, collect coins across the Polkadot-powered arena, and battle for dominance.
 
@@ -127,8 +127,7 @@ Watch our developers talk a little bit about the idea and how it was built:
 
 ### Screenshots
 
-<img src="static/images/screenshot_1.jpeg" height=600 alt="Registration">
-<img src="static/images/screenshot_2.jpeg" height=600 alt="Registration">
+<img src="static/images/screenshot_1.jpeg" alt="Registration">
 
 ### Wireframes
 
