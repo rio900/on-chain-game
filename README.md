@@ -65,7 +65,7 @@ DotStriker! is a real-time, multiplayer coin race — pilots control on-chain sh
 No shooting. No luck. Just speed, skill, and sync.
 The Striker who collects the most, wins.
 
-Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnbz56q0g/v2iO2ENtPZ9S8-Utd6uUfg/view?utm_content=DAGnbz56q0g&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h9a42895cf6)!
+Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnnrlCwj8/4VH96olgLoY4KJUq1WA7uA/view?utm_content=DAGnnrlCwj8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h8acaace07d)!
 
 #### 🎮 Features:
 
