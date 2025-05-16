@@ -35,8 +35,8 @@
     <li>
       <a href="#dotstriker-simulation-a-demo">DotStriker! Simulation: A Demo</a>
       <ul>
-        <li><a href="#playing-dotstriker">Playing DotStriker!</a></li>
         <li><a href="#building-demo">Building DotStriker!</a></li>
+        <li><a href="#playing-dotstriker">Playing DotStriker!</a></li>
       </ul>
     </li>
     <li><a href="#ui-design">UI Design</a></li>
@@ -111,13 +111,16 @@ Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/D
 
 ## DotStriker! Simulation: A Demo
 
-### Playing DotStriker!
-
-Watch a quick demo of how DotStriker works:
-
 ### Building DotStriker!
 
 Watch our developers talk a little bit about the idea and how it was built:
+
+### Playing DotStriker!
+
+<video src="https://youtube.com/shorts/fRfvrtR77ak" controls></video>
+
+Watch a quick demo of how DotStriker works:
+<video src="https://youtu.be/jCJ-B3NH390" controls></video>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
