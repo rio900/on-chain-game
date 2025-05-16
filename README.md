@@ -65,7 +65,7 @@ DotStriker! is a real-time, multiplayer coin race — pilots control on-chain sh
 No shooting. No luck. Just speed, skill, and sync.
 The Striker who collects the most, wins.
 
-Link to our presentation at Consensus 2025 - https://www.canva.com/design/DAGnbz56q0g/v2iO2ENtPZ9S8-Utd6uUfg/view?utm_content=DAGnbz56q0g&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h9a42895cf6
+Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnbz56q0g/v2iO2ENtPZ9S8-Utd6uUfg/view?utm_content=DAGnbz56q0g&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h9a42895cf6)!
 
 #### 🎮 Features:
 
@@ -127,12 +127,67 @@ Watch our developers talk a little bit about the idea and how it was built:
 
 ### Screenshots
 
+<img src="static/images/screenshot_1.jpeg" height=600 alt="Registration">
+<img src="static/images/screenshot_2.jpeg" height=600 alt="Registration">
+
 ### Wireframes
 
 Like many ambitious projects, Dotstrikers! began as a humble proof-of-concept napkin sketch — here’s a glimpse at the game's earliest design ideas.
 
 <img src="static/images/wf_registration.png" height=600 alt="Registration">
 <img src="static/images/wf_gameplay.png" width="600" alt="Gameplay">
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- ROADMAP -->
+
+## Roadmap
+
+Given that we only had 2 odd days to develop the entire project, we decided to do a MoSCoW style planning to outline what features we wanted to showcase:
+
+<img src="static/images/roadmap.png" alt="Team">
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- FUTURE RELEASES -->
+
+## Future Releases
+
+<ol>
+  <li>Connect to the Polkadot Hub to store NFTs</li>
+  <li>Bigger maps, more players</li>
+  <li>Add obstacles to slow down ship or end game</li>
+  <li>Add timed levels</li>
+  <li>Collect custom themes and ship upgrades as NFTs</li>
+  <li>Extend on all platforms, including desktop</li>
+</ol>
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- MEET THE DEVS -->
+
+## Meet The Devs
+
+<img src="static/images/team.jpeg" alt="Team">
+
+The team first connected at Consensus 2025, sparking a collaboration that led to the creation of DotStrikers!
+
+On our own, we do some pretty cool things too!
+
+Roman Samchuk
+<br />
+[![LinkedIn][LinkedIn]][LinkedIn-roman]
+[![GitHub][GitHub]][GitHub-roman]
+
+Oyonika Samazder
+<br />
+[![LinkedIn][LinkedIn]][LinkedIn-oyonika]
+[![GitHub][GitHub]][GitHub-oyonika]
+
+Sami Ibrahim
+<br />
+[![LinkedIn][LinkedIn]][LinkedIn-sami]
+[![GitHub][GitHub]][GitHub-sami]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -170,56 +225,6 @@ git clone https://github.com/rio900/on-chain-game
    • Polkadot.js Apps: Connect via https://polkadot.js.org/apps and select the local node.
    • Substrate Front-End Template: Clone and run https://github.com/substrate-developer-hub/substrate-front-end-template to interact with your node.
 5. Happy developing!
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- ROADMAP -->
-
-## Roadmap
-
-Given that we only had 2 odd days to develop the entire project, we decided to do a MoSCoW style planning to outline what features we wanted to showcase: 
-
-<img src="static/images/roadmap.png" alt="Team">
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- FUTURE RELEASES -->
-
-## Future Releases
-
-<ol>
-  <li>Connect to the Polkadot Hub to store NFTs</li>
-  <li>Bigger maps, more players</li>
-  <li>Collect custom themes and ship upgrades as NFTs</li>
-  <li>Extend on all platforms, including desktop</li>
-</ol>
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- MEET THE DEVS -->
-
-## Meet The Devs
-
-<img src="static/images/team.jpeg" alt="Team">
-
-The team first connected at Consensus 2025, sparking a collaboration that led to the creation of DotStrikers!
-
-On our own, we do some pretty cool things too!
-
-Roman Samchuk
-<br />
-[![LinkedIn][LinkedIn]][LinkedIn-roman]
-[![GitHub][GitHub]][GitHub-roman]
-
-Oyonika Samazder
-<br />
-[![LinkedIn][LinkedIn]][LinkedIn-oyonika]
-[![GitHub][GitHub]][GitHub-oyonika]
-
-Sami Ibrahim
-<br />
-[![LinkedIn][LinkedIn]][LinkedIn-sami]
-[![GitHub][GitHub]][GitHub-sami]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
