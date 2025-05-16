@@ -35,8 +35,8 @@
     <li>
       <a href="#dotstriker-simulation-a-demo">DotStriker! Simulation: A Demo</a>
       <ul>
-        <li><a href="#playing-dotstriker">Playing DotStriker!</a></li>
         <li><a href="#building-demo">Building DotStriker!</a></li>
+        <li><a href="#playing-dotstriker">Playing DotStriker!</a></li>
       </ul>
     </li>
     <li><a href="#ui-design">UI Design</a></li>
@@ -58,7 +58,7 @@
 
 ## About The Project
 
- <img src="static/images/logo.png" width="800" height="300" alt="Gameplay">
+ <img src="static/images/screenshot_2.jpeg" alt="Gameplay">
 
 DotStriker! is a real-time, multiplayer coin race — pilots control on-chain ships, collect coins across the Polkadot-powered arena, and battle for dominance.
 
@@ -111,13 +111,16 @@ Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/D
 
 ## DotStriker! Simulation: A Demo
 
-### Playing DotStriker!
-
-Watch a quick demo of how DotStriker works:
-
 ### Building DotStriker!
 
 Watch our developers talk a little bit about the idea and how it was built:
+
+### Playing DotStriker!
+
+<video src="https://youtube.com/shorts/fRfvrtR77ak" controls></video>
+
+Watch a quick demo of how DotStriker works:
+<video src="https://youtu.be/jCJ-B3NH390" controls></video>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -127,8 +130,7 @@ Watch our developers talk a little bit about the idea and how it was built:
 
 ### Screenshots
 
-<img src="static/images/screenshot_1.jpeg" height=600 alt="Registration">
-<img src="static/images/screenshot_2.jpeg" height=600 alt="Registration">
+<img src="static/images/screenshot_1.jpeg" alt="Registration">
 
 ### Wireframes
 
