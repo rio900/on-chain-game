@@ -122,6 +122,7 @@ If you cannot see the preview on your browser, [here](https://youtube.com/shorts
 ### Playing DotStriker!
 
 Watch a quick demo of how DotStriker works:
+<br />
 <video src="https://youtu.be/jCJ-B3NH390" controls></video>
 <br />
 If you cannot see the preview on your browser, [here](https://youtu.be/jCJ-B3NH390) is the link.
