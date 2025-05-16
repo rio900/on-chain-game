@@ -65,6 +65,8 @@ DotStriker! is a real-time, multiplayer coin race — pilots control on-chain sh
 No shooting. No luck. Just speed, skill, and sync.
 The Striker who collects the most, wins.
 
+Link to our presentation at Consensus 2025 - https://www.canva.com/design/DAGnbz56q0g/v2iO2ENtPZ9S8-Utd6uUfg/view?utm_content=DAGnbz56q0g&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h9a42895cf6
+
 #### 🎮 Features:
 
 - 🚀 Real-time multiplayer combat in a cosmic arena
@@ -142,37 +144,42 @@ To get a local copy up and running, follow these simple example steps:
 
 ### Prerequisites
 
-- npm
-  ```sh
-  npm install npm@latest -g
-  ```
+- Rust (with rustup): Install from https://rustup.rs
+- Substrate dependencies: Follow the official Substrate installation guide https://docs.substrate.io/install/
+- node.js: Install from https://nodejs.org/en/download
+- Unity:
+- Git: For cloning the repository
 
 ### Installation
 
-1. Get a free API Key at [https://example.com](https://example.com)
-2. Clone the repo
+1. Clone the Repositories
+
+```sh
+git clone https://github.com/rio900/on-chain-game
+```
+
+2. Build the project in release mode using Cargo:
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   cargo build --release
    ```
-3. Install NPM packages
+3. After building, you can start a local development node with runtime debug logging enabled:
    ```sh
-   npm install
+   RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --execution=wasm
    ```
-4. Enter your API in `config.js`
-   ```js
-   const API_KEY = "ENTER YOUR API";
-   ```
-5. Change git remote url to avoid accidental pushes to base project
-   ```sh
-   git remote set-url origin github_username/repo_name
-   git remote -v # confirm the changes
-   ```
+4. Once the node is running, you can interact with it using:
+   • Polkadot.js Apps: Connect via https://polkadot.js.org/apps and select the local node.
+   • Substrate Front-End Template: Clone and run https://github.com/substrate-developer-hub/substrate-front-end-template to interact with your node.
+5. Happy developing!
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ROADMAP -->
 
 ## Roadmap
+
+Given that we only had 2 odd days to develop the entire project, we decided to do a MoSCoW style planning to outline what features we wanted to showcase: 
+
+<img src="static/images/roadmap.png" alt="Team">
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -199,17 +206,18 @@ The team first connected at Consensus 2025, sparking a collaboration that led to
 
 On our own, we do some pretty cool things too!
 
-Roman Samchuk is a \_
+Roman Samchuk
 <br />
 [![LinkedIn][LinkedIn]][LinkedIn-roman]
 [![GitHub][GitHub]][GitHub-roman]
 
-Oyonika Samazder is a \_
+Oyonika Samazder
 <br />
 [![LinkedIn][LinkedIn]][LinkedIn-oyonika]
 [![GitHub][GitHub]][GitHub-oyonika]
 
-Sami Ibrahim is a \_
+Sami Ibrahim
+<br />
 [![LinkedIn][LinkedIn]][LinkedIn-sami]
 [![GitHub][GitHub]][GitHub-sami]
 
