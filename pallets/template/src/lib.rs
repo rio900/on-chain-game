@@ -47,7 +47,8 @@ pub struct Flight<BlockNumber> {
     pub end: BlockNumber,
 }
 
-pub type AsteroidId = u64;
+//pub type AsteroidId = u64;
+pub type AsteroidType = u64;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -70,12 +71,12 @@ pub mod pallet {
     #[pallet::storage]
     pub type Something<T> = StorageValue<_, u32>;
 
-    #[pallet::storage]
-    pub type AsteroidIds<T> = StorageValue<_, u64, ValueQuery>;
+    // #[pallet::storage]
+    //  pub type AsteroidIds<T> = StorageValue<_, u64, ValueQuery>;
 
     #[pallet::storage]
     pub type Asteroids<T: Config> =
-        StorageMap<_, Twox64Concat, AsteroidId, (Coord, BlockNumberFor<T>), OptionQuery>;
+        StorageMap<_, Twox64Concat, Coord, (AsteroidType, BlockNumberFor<T>), OptionQuery>;
 
     #[pallet::storage]
     pub type Flights<T: Config> =
@@ -98,12 +99,12 @@ pub mod pallet {
         },
 
         AsteroidSpawned {
-            resource_id: AsteroidId,
+            resource_id: AsteroidType,
             coord: Coord,
         },
 
         AsteroidRemoved {
-            id: AsteroidId,
+            coord: Coord,
         },
 
         FlightStarted {
@@ -127,19 +128,23 @@ pub mod pallet {
 
             for (as_id, (coord, ttl_block)) in Asteroids::<T>::iter() {
                 if ttl_block < now {
-                    Asteroids::<T>::remove(as_id);
-
-                    weight += T::DbWeight::get().writes(1);
-                    Self::deposit_event(Event::AsteroidRemoved { id: as_id });
+                    Self::deposit_event(Event::AsteroidRemoved {
+                        coord: as_id.clone(),
+                    });
                     runtime_print!(
                         "[on_initialize] remove asteroid {:?} coord: {:?}",
                         as_id,
                         coord
                     );
+                    Asteroids::<T>::remove(as_id);
+
+                    weight += T::DbWeight::get().writes(1);
                 }
             }
 
-            let mut id = AsteroidIds::<T>::get();
+            let type_id: AsteroidType = 0; // Moq asteroid type
+            let map_size: u32 = 50; // Moq map size
+
             // Let’s treat it as a constant for now
             // until it becomes a real constant after refactoring
             let max_asteroids_count = 10;
@@ -153,24 +158,32 @@ pub mod pallet {
             if difference > 0 {
                 for i in 0..difference {
                     let coord: Coord = Coord {
-                        x: Self::get_random_x(50, i as u32),
-                        y: Self::get_random_y(50, i as u32),
+                        x: Self::get_random_x(map_size, i as u32),
+                        y: Self::get_random_y(map_size, i as u32),
                     };
+
+                    if Asteroids::<T>::contains_key(coord.clone()) {
+                        runtime_print!("[on_init] Asteroid already exists at coord {:?}", coord);
+                        continue;
+                    }
 
                     let ttl_block = now + (ttl_const + i as u32).into();
 
-                    Asteroids::<T>::insert(id, (coord.clone(), ttl_block));
-                    runtime_print!("[on_init] Asteroid #{:?} spawned at coord {:?}", id, coord);
+                    Asteroids::<T>::insert(coord.clone(), (type_id, ttl_block));
+                    runtime_print!(
+                        "[on_init] Asteroid #{:?} spawned at coord {:?}",
+                        type_id,
+                        coord
+                    );
                     Self::deposit_event(Event::AsteroidSpawned {
-                        resource_id: id,
+                        resource_id: type_id,
                         coord: coord.clone(),
                     });
 
-                    id += 1;
                     weight += T::DbWeight::get().writes(1);
                 }
             }
-            AsteroidIds::<T>::put(id);
+
             weight += T::DbWeight::get().writes(1);
 
             for (user, flight) in Flights::<T>::iter() {
