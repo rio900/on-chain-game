@@ -5,6 +5,9 @@ pub use pallet::*;
 pub mod weights;
 pub use weights::*;
 
+pub mod utils;
+use crate::utils::*;
+
 use frame_support::sp_runtime::RuntimeDebug;
 use scale_info::TypeInfo;
 #[cfg(test)]
@@ -47,7 +50,6 @@ pub struct Flight<BlockNumber> {
     pub end: BlockNumber,
 }
 
-//pub type AsteroidId = u64;
 pub type AsteroidType = u64;
 
 #[frame_support::pallet]
@@ -86,14 +88,20 @@ pub mod pallet {
     pub type ActiveShips<T: Config> =
         StorageMap<_, Twox64Concat, UserAccount<T>, Coord, OptionQuery>;
 
+    #[pallet::storage]
+    pub type AccountResources<T: Config> = StorageDoubleMap<
+        _,
+        Twox64Concat,
+        UserAccount<T>,
+        Twox64Concat,
+        AsteroidType,
+        u64, // count
+        ValueQuery,
+    >;
+
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        SomethingStored {
-            something: u32,
-            who: T::AccountId,
-        },
-
         TestEvent {
             something: u32,
         },
@@ -126,17 +134,22 @@ pub mod pallet {
         fn on_initialize(now: BlockNumberFor<T>) -> Weight {
             let mut weight = Weight::zero();
 
-            for (as_id, (coord, ttl_block)) in Asteroids::<T>::iter() {
+            for (user, flight) in Flights::<T>::iter() {
+                if flight.end < now {
+                    // Cherck asteroid coord
+                    Self::collect_asteroid::<T>(user.clone(), flight.to.clone());
+
+                    ActiveShips::<T>::insert(user.clone(), flight.to.clone());
+                    Flights::<T>::remove(user.clone());
+
+                    weight += T::DbWeight::get().writes(2);
+                    runtime_print!("[on_init] Flight removed {:?}", user);
+                }
+            }
+
+            for (coord, (as_id, ttl_block)) in Asteroids::<T>::iter() {
                 if ttl_block < now {
-                    Self::deposit_event(Event::AsteroidRemoved {
-                        coord: as_id.clone(),
-                    });
-                    runtime_print!(
-                        "[on_initialize] remove asteroid {:?} coord: {:?}",
-                        as_id,
-                        coord
-                    );
-                    Asteroids::<T>::remove(as_id);
+                    Self::remove_asteroid::<T>(coord.clone());
 
                     weight += T::DbWeight::get().writes(1);
                 }
@@ -147,19 +160,19 @@ pub mod pallet {
 
             // Let’s treat it as a constant for now
             // until it becomes a real constant after refactoring
-            let max_asteroids_count = 10;
+            let max_asteroids_count: usize = 10;
 
             let asteroids_count = Asteroids::<T>::iter().count();
 
-            let difference = max_asteroids_count - asteroids_count;
+            let difference = max_asteroids_count.saturating_sub(asteroids_count);
 
             // One more constant I need to remove from here
             let ttl_const = 5;
             if difference > 0 {
                 for i in 0..difference {
                     let coord: Coord = Coord {
-                        x: Self::get_random_x(map_size, i as u32),
-                        y: Self::get_random_y(map_size, i as u32),
+                        x: get_random_x::<T>(map_size, i as u32),
+                        y: get_random_y::<T>(map_size, i as u32),
                     };
 
                     if Asteroids::<T>::contains_key(coord.clone()) {
@@ -185,16 +198,6 @@ pub mod pallet {
             }
 
             weight += T::DbWeight::get().writes(1);
-
-            for (user, flight) in Flights::<T>::iter() {
-                if flight.end < now {
-                    ActiveShips::<T>::insert(user.clone(), flight.to.clone());
-                    Flights::<T>::remove(user.clone());
-
-                    weight += T::DbWeight::get().writes(2);
-                    runtime_print!("[on_init] Flight removed {:?}", user);
-                }
-            }
 
             weight
         }
@@ -266,41 +269,82 @@ pub mod pallet {
                 }
             }
         }
+
+        #[pallet::call_index(2)]
+        #[pallet::weight(T::WeightInfo::do_something())]
+        pub fn try_to_collect_resource(origin: OriginFor<T>, coord: Coord) -> DispatchResult {
+            // Ensure the call is signed and extract the caller's account
+            let who = ensure_signed(origin)?;
+
+            // The player cannot collect resources while their ship is in flight
+            if Flights::<T>::contains_key(&who) {
+                runtime_print!("[try_to_collect_resource] Ship is still in flight");
+                return Err(Error::<T>::NoneValue.into());
+            }
+
+            // The player must have an active ship on the map
+            let ship_coord = ActiveShips::<T>::get(&who).ok_or(Error::<T>::NoneValue)?;
+
+            // Calculate the Manhattan distance between the ship and the asteroid
+            let distance = get_distance(ship_coord.clone(), coord.clone());
+
+            // Will replace with a constant later
+            let distance_limit = 2; // Max allowed distance to collect a resource
+
+            if distance > distance_limit {
+                runtime_print!(
+            "[try_to_collect_resource] Too far to collect resource at coord {:?}, distance: {}",
+            coord, distance
+        );
+                return Err(Error::<T>::NoneValue.into());
+            }
+
+            // Collect the asteroid (adds resource and removes asteroid)
+            Self::collect_asteroid::<T>(who.clone(), coord.clone());
+            runtime_print!(
+                "[try_to_collect_resource] Successfully collected resource at coord {:?}",
+                coord
+            );
+            Ok(())
+        }
     }
 
     impl<T: Config> Pallet<T> {
-        // Don’t do that. it’s a bad practice
-        // I’m just gonna harry up
-        fn get_hash_u32() -> u32 {
-            let hash = <frame_system::Pallet<T>>::parent_hash();
-            let bytes = hash.as_ref();
-            u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
-        }
+        fn collect_asteroid<Runtime: Config>(user: UserAccount<T>, coord: Coord) {
+            match Asteroids::<Runtime>::get(coord.clone()) {
+                None => {
+                    runtime_print!("[TakeAsteroid] No asteroid found at coord {:?}", coord);
+                    return;
+                }
+                Some(asteroid) => {
+                    Self::add_resource_to_account(&user, asteroid.0, 1);
 
-        fn get_random(seed: u32, skip: u32, max: u32) -> u32 {
-            let mut local_skip = skip;
-            if skip == 0 {
-                local_skip = 1;
+                    Self::remove_asteroid::<T>(coord.clone());
+                    runtime_print!("[TakeAsteroid] Asteroid taken at coord {:?}", coord);
+                }
             }
-
-            let new_seed = seed / local_skip;
-            new_seed % max
         }
 
-        pub fn get_random_x(max: u32, index: u32) -> u32 {
-            let hash = Self::get_hash_u32();
-            let result = Self::get_random(hash, index, max);
-            runtime_print!("[on_init] x:{:?}", result);
-
-            result
+        fn remove_asteroid<Runtime: Config>(coord: Coord) {
+            Self::deposit_event(Event::AsteroidRemoved {
+                coord: coord.clone(),
+            });
+            runtime_print!("[on_initialize] remove coord: {:?}", coord);
+            Asteroids::<T>::remove(coord);
         }
 
-        pub fn get_random_y(max: u32, index: u32) -> u32 {
-            let hash = Self::get_hash_u32();
-            let result = Self::get_random(hash, 100 + index, max);
-            runtime_print!("[on_init] y:{:?}", result);
-
-            result
+        fn add_resource_to_account(
+            user: &UserAccount<T>,
+            resource_type: AsteroidType,
+            amount: u64,
+        ) {
+            AccountResources::<T>::mutate(user, resource_type, |count| {
+                *count = count.saturating_add(amount);
+                runtime_print!(
+                "[add_resource_to_account] Added {} of resource {:?} to user {:?}. Total now: {}",
+                amount, resource_type, user, *count
+            );
+            });
         }
     }
 }
