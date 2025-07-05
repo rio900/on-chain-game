@@ -51,6 +51,7 @@ pub struct Flight<BlockNumber> {
 }
 
 pub type AsteroidType = u64;
+pub type Energy = u32;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -86,7 +87,7 @@ pub mod pallet {
 
     #[pallet::storage]
     pub type ActiveShips<T: Config> =
-        StorageMap<_, Twox64Concat, UserAccount<T>, Coord, OptionQuery>;
+        StorageMap<_, Twox64Concat, UserAccount<T>, (Coord, Energy), OptionQuery>;
 
     #[pallet::storage]
     pub type AccountResources<T: Config> = StorageDoubleMap<
@@ -121,6 +122,9 @@ pub mod pallet {
             to: Coord,
             end: BlockNumberFor<T>,
         },
+        EnergyDepleted {
+            owner: T::AccountId,
+        },
     }
 
     #[pallet::error]
@@ -139,7 +143,9 @@ pub mod pallet {
                     // Cherck asteroid coord
                     Self::collect_asteroid::<T>(user.clone(), flight.to.clone());
 
-                    ActiveShips::<T>::insert(user.clone(), flight.to.clone());
+                    // I'm not sure about 100 energy, it should be a constant or a config value
+                    let energy = ActiveShips::<T>::get(&user).map(|(_, e)| e).unwrap_or(0);
+                    ActiveShips::<T>::insert(user.clone(), (flight.to.clone(), energy));
                     Flights::<T>::remove(user.clone());
 
                     weight += T::DbWeight::get().writes(2);
@@ -199,6 +205,29 @@ pub mod pallet {
 
             weight += T::DbWeight::get().writes(1);
 
+            let energy_depletion_rate: u32 = 2; // Moq energy depletion rate
+                                                // Deplete energy of active ships
+            for (owner, (coord, energy)) in ActiveShips::<T>::iter() {
+                let new_energy = energy.saturating_sub(energy_depletion_rate);
+
+                if new_energy == 0 {
+                    runtime_print!(
+                        "[on_init] Ship has no energy and is deactivated: {:?}",
+                        owner
+                    );
+                    ActiveShips::<T>::remove(owner.clone());
+
+                    Self::deposit_event(Event::EnergyDepleted {
+                        owner: owner.clone(),
+                    });
+                    continue;
+                }
+
+                ActiveShips::<T>::insert(owner.clone(), (coord.clone(), new_energy));
+
+                weight += T::DbWeight::get().writes(1);
+            }
+
             weight
         }
     }
@@ -218,12 +247,12 @@ pub mod pallet {
             let mut from_coord = Coord { x: 0, y: 0 };
 
             if !ActiveShips::<T>::contains_key(who.clone()) {
-                ActiveShips::<T>::insert(who.clone(), from_coord.clone());
+                ActiveShips::<T>::insert(who.clone(), (from_coord.clone(), 100));
                 runtime_print!("[on_init] Active ship added {:?}", who);
                 // return Err(Error::<T>::NoneValue.into());
             } else {
                 let ship_coord = ActiveShips::<T>::get(who.clone()).unwrap();
-                from_coord = ship_coord;
+                from_coord = ship_coord.0.clone();
             }
 
             let block_number = <frame_system::Pallet<T>>::block_number();
@@ -286,7 +315,7 @@ pub mod pallet {
             let ship_coord = ActiveShips::<T>::get(&who).ok_or(Error::<T>::NoneValue)?;
 
             // Calculate the Manhattan distance between the ship and the asteroid
-            let distance = get_distance(ship_coord.clone(), coord.clone());
+            let distance = get_distance(ship_coord.0.clone(), coord.clone());
 
             // Will replace with a constant later
             let distance_limit = 2; // Max allowed distance to collect a resource
