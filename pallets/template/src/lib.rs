@@ -16,6 +16,14 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+const DEFAULT_ENERGY: u32 = 100;
+// Deplete energy of active ships
+const ENERGY_DEPLETION_RATE: u32 = 2;
+const MAX_ASTEROIDS_COUNT: usize = 10;
+const MAP_SIZE: u32 = 50;
+const ASTEROID_TTL_CONST: u32 = 5;
+const RESOURCE_DISTANCE_LIMIT: u32 = 2;
+
 #[derive(
     Encode,
     Decode,
@@ -51,6 +59,7 @@ pub struct Flight<BlockNumber> {
 }
 
 pub type AsteroidType = u64;
+pub type Energy = u32;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -86,7 +95,7 @@ pub mod pallet {
 
     #[pallet::storage]
     pub type ActiveShips<T: Config> =
-        StorageMap<_, Twox64Concat, UserAccount<T>, Coord, OptionQuery>;
+        StorageMap<_, Twox64Concat, UserAccount<T>, (Coord, Energy), OptionQuery>;
 
     #[pallet::storage]
     pub type AccountResources<T: Config> = StorageDoubleMap<
@@ -121,6 +130,15 @@ pub mod pallet {
             to: Coord,
             end: BlockNumberFor<T>,
         },
+
+        EnergyDepleted {
+            owner: T::AccountId,
+        },
+
+        GameStarted {
+            owner: T::AccountId,
+            coord: Coord,
+        },
     }
 
     #[pallet::error]
@@ -135,16 +153,21 @@ pub mod pallet {
             let mut weight = Weight::zero();
 
             for (user, flight) in Flights::<T>::iter() {
-                if flight.end < now {
-                    // Cherck asteroid coord
-                    Self::collect_asteroid::<T>(user.clone(), flight.to.clone());
-
-                    ActiveShips::<T>::insert(user.clone(), flight.to.clone());
-                    Flights::<T>::remove(user.clone());
-
-                    weight += T::DbWeight::get().writes(2);
-                    runtime_print!("[on_init] Flight removed {:?}", user);
+                if flight.end >= now {
+                    continue;
                 }
+
+                let coord = flight.to.clone();
+
+                Self::collect_asteroid::<T>(user.clone(), coord.clone());
+
+                let energy = ActiveShips::<T>::get(&user).map(|(_, e)| e).unwrap_or(0);
+
+                ActiveShips::<T>::insert(user.clone(), (coord, energy));
+                Flights::<T>::remove(&user);
+
+                weight += T::DbWeight::get().writes(2);
+                runtime_print!("[on_init] Flight removed {:?}", user);
             }
 
             for (coord, (as_id, ttl_block)) in Asteroids::<T>::iter() {
@@ -156,18 +179,14 @@ pub mod pallet {
             }
 
             let type_id: AsteroidType = 0; // Moq asteroid type
-            let map_size: u32 = 50; // Moq map size
-
-            // Let’s treat it as a constant for now
-            // until it becomes a real constant after refactoring
-            let max_asteroids_count: usize = 10;
+            let map_size: u32 = MAP_SIZE; // Moq map size
 
             let asteroids_count = Asteroids::<T>::iter().count();
 
-            let difference = max_asteroids_count.saturating_sub(asteroids_count);
+            let difference = MAX_ASTEROIDS_COUNT.saturating_sub(asteroids_count);
 
             // One more constant I need to remove from here
-            let ttl_const = 5;
+            let ttl_const = ASTEROID_TTL_CONST;
             if difference > 0 {
                 for i in 0..difference {
                     let coord: Coord = Coord {
@@ -199,6 +218,27 @@ pub mod pallet {
 
             weight += T::DbWeight::get().writes(1);
 
+            for (owner, (coord, energy)) in ActiveShips::<T>::iter() {
+                let new_energy = energy.saturating_sub(ENERGY_DEPLETION_RATE);
+
+                if new_energy == 0 {
+                    runtime_print!(
+                        "[on_init] Ship has no energy and is deactivated: {:?}",
+                        owner
+                    );
+                    ActiveShips::<T>::remove(owner.clone());
+
+                    Self::deposit_event(Event::EnergyDepleted {
+                        owner: owner.clone(),
+                    });
+                    continue;
+                }
+
+                ActiveShips::<T>::insert(owner.clone(), (coord.clone(), new_energy));
+
+                weight += T::DbWeight::get().writes(1);
+            }
+
             weight
         }
     }
@@ -215,16 +255,12 @@ pub mod pallet {
                 return Err(Error::<T>::NoneValue.into());
             }
 
-            let mut from_coord = Coord { x: 0, y: 0 };
-
             if !ActiveShips::<T>::contains_key(who.clone()) {
-                ActiveShips::<T>::insert(who.clone(), from_coord.clone());
-                runtime_print!("[on_init] Active ship added {:?}", who);
-                // return Err(Error::<T>::NoneValue.into());
-            } else {
-                let ship_coord = ActiveShips::<T>::get(who.clone()).unwrap();
-                from_coord = ship_coord;
+                return Err(Error::<T>::NoneValue.into());
             }
+
+            let ship_coord = ActiveShips::<T>::get(who.clone()).unwrap();
+            let from_coord = ship_coord.0.clone();
 
             let block_number = <frame_system::Pallet<T>>::block_number();
             let end_block = block_number + 2u32.into();
@@ -286,12 +322,9 @@ pub mod pallet {
             let ship_coord = ActiveShips::<T>::get(&who).ok_or(Error::<T>::NoneValue)?;
 
             // Calculate the Manhattan distance between the ship and the asteroid
-            let distance = get_distance(ship_coord.clone(), coord.clone());
+            let distance = get_distance(ship_coord.0.clone(), coord.clone());
 
-            // Will replace with a constant later
-            let distance_limit = 2; // Max allowed distance to collect a resource
-
-            if distance > distance_limit {
+            if distance > RESOURCE_DISTANCE_LIMIT {
                 runtime_print!(
             "[try_to_collect_resource] Too far to collect resource at coord {:?}, distance: {}",
             coord, distance
@@ -305,6 +338,28 @@ pub mod pallet {
                 "[try_to_collect_resource] Successfully collected resource at coord {:?}",
                 coord
             );
+            Ok(())
+        }
+
+        #[pallet::call_index(3)]
+        #[pallet::weight(T::WeightInfo::do_something())]
+        pub fn start_game(origin: OriginFor<T>, coord: Coord) -> DispatchResult {
+            // Check that the extrinsic was signed and get the signer.
+            let who = ensure_signed(origin)?;
+
+            if ActiveShips::<T>::contains_key(who.clone()) {
+                runtime_print!("[start_game] Player already has an active ship: {:?}", who);
+                return Err(Error::<T>::NoneValue.into());
+            }
+
+            ActiveShips::<T>::insert(who.clone(), (coord.clone(), DEFAULT_ENERGY));
+
+            Self::deposit_event(Event::GameStarted {
+                owner: who.clone(),
+                coord: coord.clone(),
+            });
+            runtime_print!("[on_init] Active ship added {:?} coord: {:?}", who, coord);
+
             Ok(())
         }
     }
