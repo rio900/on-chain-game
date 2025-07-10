@@ -19,10 +19,15 @@ mod tests;
 const DEFAULT_ENERGY: u32 = 100;
 // Deplete energy of active ships
 const ENERGY_DEPLETION_RATE: u32 = 2;
-const MAX_ASTEROIDS_COUNT: usize = 10;
+const MAX_ASTEROIDS_COUNT: u32 = 10;
 const MAP_SIZE: u32 = 50;
-const ASTEROID_TTL_CONST: u32 = 5;
+const ASTEROID_TTL_CONST: u32 = 10;
 const RESOURCE_DISTANCE_LIMIT: u32 = 2;
+const DEFAULT_DOT_STAKE: u64 = 5;
+/// Minimum number of blocks that must pass before another NFT asteroid can spawn
+const NFT_SPAWN_COOLDOWN_BLOCKS: u32 = 10;
+/// Maximum percentage of the DOT prize pool that can be emitted as DOT asteroids
+const DOT_EMISSION_LIMIT_RATIO: u64 = 10; // 10%
 
 #[derive(
     Encode,
@@ -58,14 +63,37 @@ pub struct Flight<BlockNumber> {
     pub end: BlockNumber,
 }
 
-pub type AsteroidType = u64;
+#[derive(
+    Encode,
+    Decode,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    RuntimeDebug,
+    TypeInfo,
+    MaxEncodedLen,
+    DecodeWithMemTracking,
+)]
+pub enum AsteroidKind {
+    Energy = 0,
+    Gold = 1,
+    Dot0 = 2,
+    Dot1 = 3,
+    Dot2 = 4,
+    Nft0 = 5,
+    Nft1 = 6,
+    Nft2 = 7,
+}
+
+pub type AsteroidType = AsteroidKind;
 pub type Energy = u32;
 
 #[frame_support::pallet]
 pub mod pallet {
 
     use super::*;
-    use frame_support::{pallet_prelude::*, runtime_print};
+    use frame_support::{pallet_prelude::*, runtime_print, storage::child::get};
     use frame_system::pallet_prelude::*;
 
     #[pallet::pallet]
@@ -107,6 +135,15 @@ pub mod pallet {
         u64, // count
         ValueQuery,
     >;
+
+    #[pallet::storage]
+    pub type DotPrizePool<T> = StorageValue<_, u64, ValueQuery>; // Total amount of DOT deposited into the prize pool
+
+    #[pallet::storage]
+    pub type DotEmittedTotal<T> = StorageValue<_, u64, ValueQuery>; // Total amount of DOT already emitted through asteroids
+
+    #[pallet::storage]
+    pub type LastNftSpawnBlock<T> = StorageValue<_, BlockNumberFor<T>, ValueQuery>; // The block number when the last NFT asteroid was spawned
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -172,18 +209,18 @@ pub mod pallet {
 
             for (coord, (as_id, ttl_block)) in Asteroids::<T>::iter() {
                 if ttl_block < now {
-                    Self::remove_asteroid::<T>(coord.clone());
+                    Self::remove_asteroid::<T>(as_id, coord.clone());
 
                     weight += T::DbWeight::get().writes(1);
                 }
             }
 
-            let type_id: AsteroidType = 0; // Moq asteroid type
             let map_size: u32 = MAP_SIZE; // Moq map size
 
             let asteroids_count = Asteroids::<T>::iter().count();
 
-            let difference = MAX_ASTEROIDS_COUNT.saturating_sub(asteroids_count);
+            let difference =
+                MAX_ASTEROIDS_COUNT.saturating_sub(asteroids_count.try_into().unwrap_or(0));
 
             // One more constant I need to remove from here
             let ttl_const = ASTEROID_TTL_CONST;
@@ -199,16 +236,35 @@ pub mod pallet {
                         continue;
                     }
 
+                    let asteroid_type = Self::get_random_asteroid_type::<T>(i, now);
+
+                    if matches!(
+                        asteroid_type,
+                        AsteroidKind::Dot0 | AsteroidKind::Dot1 | AsteroidKind::Dot2
+                    ) {
+                        let dot_amount = Self::get_dot_amount::<T>(asteroid_type);
+
+                        // Add the DOT to the emitted total
+                        DotEmittedTotal::<T>::mutate(|total| {
+                            *total = total.saturating_add(dot_amount);
+                        });
+                    } else if matches!(
+                        asteroid_type,
+                        AsteroidKind::Nft0 | AsteroidKind::Nft1 | AsteroidKind::Nft2
+                    ) {
+                        LastNftSpawnBlock::<T>::put(now);
+                    }
+
                     let ttl_block = now + (ttl_const + i as u32).into();
 
-                    Asteroids::<T>::insert(coord.clone(), (type_id, ttl_block));
+                    Asteroids::<T>::insert(coord.clone(), (asteroid_type, ttl_block));
                     runtime_print!(
                         "[on_init] Asteroid #{:?} spawned at coord {:?}",
-                        type_id,
+                        asteroid_type,
                         coord
                     );
                     Self::deposit_event(Event::AsteroidSpawned {
-                        resource_id: type_id,
+                        resource_id: asteroid_type,
                         coord: coord.clone(),
                     });
 
@@ -358,6 +414,11 @@ pub mod pallet {
                 owner: who.clone(),
                 coord: coord.clone(),
             });
+
+            // Add the value to the total DOT prize pool
+            DotPrizePool::<T>::mutate(|pool| {
+                *pool = pool.saturating_add(DEFAULT_DOT_STAKE);
+            });
             runtime_print!("[on_init] Active ship added {:?} coord: {:?}", who, coord);
 
             Ok(())
@@ -372,20 +433,72 @@ pub mod pallet {
                     return;
                 }
                 Some(asteroid) => {
-                    Self::add_resource_to_account(&user, asteroid.0, 1);
+                    if asteroid.0 == AsteroidKind::Energy {
+                        // If the asteroid is Energy, we just add it to the user's energy
+                        let energy = ActiveShips::<T>::get(&user).map(|(_, e)| e).unwrap_or(0);
 
-                    Self::remove_asteroid::<T>(coord.clone());
+                        let new_energy = energy.saturating_add(10); // Add 10 energy
+
+                        ActiveShips::<T>::insert(user.clone(), (coord.clone(), new_energy));
+
+                        runtime_print!(
+                            "[TakeAsteroid] Energy collected for user {:?}, new energy: {}",
+                            user,
+                            new_energy
+                        );
+                    } else if matches!(
+                        asteroid.0,
+                        AsteroidKind::Nft0
+                            | AsteroidKind::Nft1
+                            | AsteroidKind::Nft2
+                            | AsteroidKind::Gold
+                    ) {
+                        Self::add_resource_to_account(&user, asteroid.0, 1);
+                    } else {
+                        let mut amount: u64 = 1;
+                        if matches!(
+                            asteroid.0,
+                            AsteroidKind::Dot0 | AsteroidKind::Dot1 | AsteroidKind::Dot2
+                        ) {
+                            amount = Self::get_dot_amount::<Runtime>(asteroid.0);
+                        }
+
+                        Self::add_resource_to_account(&user, asteroid.0, amount);
+                    }
+
+                    Self::remove_asteroid::<T>(asteroid.0, coord.clone());
+
                     runtime_print!("[TakeAsteroid] Asteroid taken at coord {:?}", coord);
                 }
             }
         }
 
-        fn remove_asteroid<Runtime: Config>(coord: Coord) {
+        fn remove_asteroid<Runtime: Config>(resource_type: AsteroidKind, coord: Coord) {
+            if matches!(
+                resource_type,
+                AsteroidKind::Dot0 | AsteroidKind::Dot1 | AsteroidKind::Dot2
+            ) {
+                let dot_amount = Self::get_dot_amount::<Runtime>(resource_type);
+                // If it's a DOT asteroid, we need to remove it from the total emitted DOT
+                DotEmittedTotal::<T>::mutate(|total| {
+                    *total = total.saturating_sub(dot_amount);
+                });
+            }
+
             Self::deposit_event(Event::AsteroidRemoved {
                 coord: coord.clone(),
             });
             runtime_print!("[on_initialize] remove coord: {:?}", coord);
             Asteroids::<T>::remove(coord);
+        }
+
+        fn get_dot_amount<Runtime: Config>(asteroid_type: AsteroidKind) -> u64 {
+            match asteroid_type {
+                AsteroidKind::Dot0 => 1,
+                AsteroidKind::Dot1 => 2,
+                AsteroidKind::Dot2 => 3,
+                _ => 0,
+            }
         }
 
         fn add_resource_to_account(
@@ -400,6 +513,46 @@ pub mod pallet {
                 amount, resource_type, user, *count
             );
             });
+        }
+
+        fn get_random_asteroid_type<Runtime: Config>(
+            index: u32,
+            block: BlockNumberFor<T>,
+        ) -> AsteroidKind {
+            let roll = get_random::<T>(100, index + 500); // 0–99
+
+            let pool_size = 100; // DotPrizePool::<T>::get();
+            let dot_emitted = DotEmittedTotal::<T>::get();
+            let last_nft_block = LastNftSpawnBlock::<T>::get();
+
+            // Calculate the number of players
+            let players_count = ActiveShips::<T>::iter().count() as u32;
+
+            if roll < 5 && dot_emitted < pool_size / DOT_EMISSION_LIMIT_RATIO {
+                // 5% chance for Dot
+                if roll < 3 {
+                    AsteroidKind::Dot0 // 3% chance for Dot0
+                } else if roll == 3 {
+                    AsteroidKind::Dot1 // 1% chance for Dot1
+                } else {
+                    AsteroidKind::Dot2 // 1% chance for Dot2
+                }
+            } else if roll < 30 {
+                AsteroidKind::Energy
+            } else if roll < 50 && block > last_nft_block + NFT_SPAWN_COOLDOWN_BLOCKS.into() {
+                if players_count < 3 {
+                    // 20% chance for NFT0 if there are less than 5 players
+                    AsteroidKind::Nft0
+                } else if players_count < 4 {
+                    // 10% chance for NFT1 if there are less than 10 players
+                    AsteroidKind::Nft1
+                } else {
+                    // 5% chance for NFT2 if there are more than 10 players
+                    AsteroidKind::Nft2
+                }
+            } else {
+                AsteroidKind::Gold
+            }
         }
     }
 }
