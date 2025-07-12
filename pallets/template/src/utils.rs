@@ -8,7 +8,7 @@ pub fn get_hash_u32<T: frame_system::Config>() -> u32 {
     u32::from_le_bytes([bytes[0], bytes[1], bytes[2], bytes[3]])
 }
 
-fn get_random(seed: u32, skip: u32, max: u32) -> u32 {
+fn get_block_randomized_value(seed: u32, skip: u32, max: u32) -> u32 {
     let skip = if skip == 0 { 1 } else { skip };
     let new_seed = seed / skip;
     new_seed % max
@@ -16,15 +16,22 @@ fn get_random(seed: u32, skip: u32, max: u32) -> u32 {
 
 pub fn get_random_x<T: frame_system::Config>(max: u32, index: u32) -> u32 {
     let hash = get_hash_u32::<T>();
-    let result = get_random(hash, index, max);
+    let result = get_block_randomized_value(hash, index, max);
     runtime_print!("[utils] x: {:?}", result);
     result
 }
 
 pub fn get_random_y<T: frame_system::Config>(max: u32, index: u32) -> u32 {
     let hash = get_hash_u32::<T>();
-    let result = get_random(hash, 100 + index, max);
+    let result = get_block_randomized_value(hash, 100 + index, max);
     runtime_print!("[utils] y: {:?}", result);
+    result
+}
+
+pub fn get_random<T: frame_system::Config>(max: u32, index: u32) -> u32 {
+    let hash = get_hash_u32::<T>();
+    let result = get_block_randomized_value(hash, index, max);
+    runtime_print!("[utils] x: {:?}", result);
     result
 }
 
