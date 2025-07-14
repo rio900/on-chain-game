@@ -66,6 +66,23 @@ pub struct Flight<BlockNumber> {
 #[derive(
     Encode,
     Decode,
+    DecodeWithMemTracking,
+    MaxEncodedLen,
+    Clone,
+    PartialEq,
+    Eq,
+    RuntimeDebug,
+    TypeInfo,
+)]
+pub struct Starship {
+    pub pos: Coord,
+    pub energy: Energy,
+    pub nft_skin: u32,
+}
+
+#[derive(
+    Encode,
+    Decode,
     Clone,
     Copy,
     PartialEq,
@@ -123,7 +140,7 @@ pub mod pallet {
 
     #[pallet::storage]
     pub type ActiveShips<T: Config> =
-        StorageMap<_, Twox64Concat, UserAccount<T>, (Coord, Energy), OptionQuery>;
+        StorageMap<_, Twox64Concat, UserAccount<T>, Starship, OptionQuery>;
 
     #[pallet::storage]
     pub type AccountResources<T: Config> = StorageDoubleMap<
@@ -166,6 +183,7 @@ pub mod pallet {
             from: Coord,
             to: Coord,
             end: BlockNumberFor<T>,
+            nft_skin: u32,
         },
 
         EnergyDepleted {
@@ -175,6 +193,7 @@ pub mod pallet {
         GameStarted {
             owner: T::AccountId,
             coord: Coord,
+            nft_skin: u32,
         },
     }
 
@@ -198,9 +217,11 @@ pub mod pallet {
 
                 Self::collect_asteroid::<T>(user.clone(), coord.clone());
 
-                let energy = ActiveShips::<T>::get(&user).map(|(_, e)| e).unwrap_or(0);
+                if let Some(mut ship) = ActiveShips::<T>::get(&user) {
+                    ship.pos = coord.clone();
+                    ActiveShips::<T>::insert(user.clone(), ship);
+                }
 
-                ActiveShips::<T>::insert(user.clone(), (coord, energy));
                 Flights::<T>::remove(&user);
 
                 weight += T::DbWeight::get().writes(2);
@@ -274,8 +295,8 @@ pub mod pallet {
 
             weight += T::DbWeight::get().writes(1);
 
-            for (owner, (coord, energy)) in ActiveShips::<T>::iter() {
-                let new_energy = energy.saturating_sub(ENERGY_DEPLETION_RATE);
+            for (owner, ship) in ActiveShips::<T>::iter() {
+                let new_energy = ship.energy.saturating_sub(ENERGY_DEPLETION_RATE);
 
                 if new_energy == 0 {
                     runtime_print!(
@@ -290,7 +311,14 @@ pub mod pallet {
                     continue;
                 }
 
-                ActiveShips::<T>::insert(owner.clone(), (coord.clone(), new_energy));
+                ActiveShips::<T>::insert(
+                    owner.clone(),
+                    Starship {
+                        pos: ship.pos,
+                        energy: new_energy,
+                        nft_skin: ship.nft_skin,
+                    },
+                );
 
                 weight += T::DbWeight::get().writes(1);
             }
@@ -316,7 +344,7 @@ pub mod pallet {
             }
 
             let ship_coord = ActiveShips::<T>::get(who.clone()).unwrap();
-            let from_coord = ship_coord.0.clone();
+            let from_coord = ship_coord.pos.clone();
 
             let block_number = <frame_system::Pallet<T>>::block_number();
             let end_block = block_number + 2u32.into();
@@ -337,6 +365,7 @@ pub mod pallet {
                 from: from_coord.clone(),
                 to: coord.clone(),
                 end: end_block,
+                nft_skin: ship_coord.nft_skin,
             });
 
             Ok(())
@@ -378,7 +407,7 @@ pub mod pallet {
             let ship_coord = ActiveShips::<T>::get(&who).ok_or(Error::<T>::NoneValue)?;
 
             // Calculate the Manhattan distance between the ship and the asteroid
-            let distance = get_distance(ship_coord.0.clone(), coord.clone());
+            let distance = get_distance(ship_coord.pos.clone(), coord.clone());
 
             if distance > RESOURCE_DISTANCE_LIMIT {
                 runtime_print!(
@@ -399,7 +428,7 @@ pub mod pallet {
 
         #[pallet::call_index(3)]
         #[pallet::weight(T::WeightInfo::do_something())]
-        pub fn start_game(origin: OriginFor<T>, coord: Coord) -> DispatchResult {
+        pub fn start_game(origin: OriginFor<T>, coord: Coord, nft_skin: u32) -> DispatchResult {
             // Check that the extrinsic was signed and get the signer.
             let who = ensure_signed(origin)?;
 
@@ -408,11 +437,40 @@ pub mod pallet {
                 return Err(Error::<T>::NoneValue.into());
             }
 
-            ActiveShips::<T>::insert(who.clone(), (coord.clone(), DEFAULT_ENERGY));
+            if nft_skin != 0 {
+                let asteroid_kind = match nft_skin {
+                    5 => AsteroidKind::Nft0,
+                    6 => AsteroidKind::Nft1,
+                    7 => AsteroidKind::Nft2,
+                    _ => {
+                        runtime_print!("[start_game] Invalid nft_skin: {}", nft_skin);
+                        return Err(Error::<T>::NoneValue.into());
+                    }
+                };
+
+                let has_nft = AccountResources::<T>::get(&who, asteroid_kind) > 0;
+                if !has_nft {
+                    runtime_print!(
+                        "[start_game] Player does not have the required NFT: {:?}",
+                        asteroid_kind
+                    );
+                    return Err(Error::<T>::NoneValue.into());
+                }
+            }
+
+            ActiveShips::<T>::insert(
+                who.clone(),
+                Starship {
+                    pos: coord.clone(),
+                    energy: DEFAULT_ENERGY,
+                    nft_skin: nft_skin,
+                },
+            );
 
             Self::deposit_event(Event::GameStarted {
                 owner: who.clone(),
                 coord: coord.clone(),
+                nft_skin: nft_skin,
             });
 
             // Add the value to the total DOT prize pool
@@ -435,17 +493,18 @@ pub mod pallet {
                 Some(asteroid) => {
                     if asteroid.0 == AsteroidKind::Energy {
                         // If the asteroid is Energy, we just add it to the user's energy
-                        let energy = ActiveShips::<T>::get(&user).map(|(_, e)| e).unwrap_or(0);
+                        if let Some(mut ship) = ActiveShips::<T>::get(&user) {
+                            ship.energy = ship.energy.saturating_add(10);
+                            ship.pos = coord.clone();
 
-                        let new_energy = energy.saturating_add(10); // Add 10 energy
+                            runtime_print!(
+                                "[TakeAsteroid] Energy collected for user {:?}, new energy: {}",
+                                user,
+                                ship.energy
+                            );
 
-                        ActiveShips::<T>::insert(user.clone(), (coord.clone(), new_energy));
-
-                        runtime_print!(
-                            "[TakeAsteroid] Energy collected for user {:?}, new energy: {}",
-                            user,
-                            new_energy
-                        );
+                            ActiveShips::<T>::insert(user.clone(), ship);
+                        }
                     } else if matches!(
                         asteroid.0,
                         AsteroidKind::Nft0
@@ -461,9 +520,11 @@ pub mod pallet {
                             AsteroidKind::Dot0 | AsteroidKind::Dot1 | AsteroidKind::Dot2
                         ) {
                             amount = Self::get_dot_amount::<Runtime>(asteroid.0);
+                            // Temporarily solution
+                            Self::add_resource_to_account(&user, AsteroidKind::Dot0, amount);
+                        } else {
+                            Self::add_resource_to_account(&user, asteroid.0, amount);
                         }
-
-                        Self::add_resource_to_account(&user, asteroid.0, amount);
                     }
 
                     Self::remove_asteroid::<T>(asteroid.0, coord.clone());
