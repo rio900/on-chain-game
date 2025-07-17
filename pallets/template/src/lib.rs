@@ -19,10 +19,10 @@ mod tests;
 const DEFAULT_ENERGY: u32 = 100;
 // Deplete energy of active ships
 const ENERGY_DEPLETION_RATE: u32 = 2;
-const MAX_ASTEROIDS_COUNT: u32 = 10;
+const MAX_ASTEROIDS_COUNT: u32 = 30;
 const MAP_SIZE: u32 = 50;
 const ASTEROID_TTL_CONST: u32 = 10;
-const RESOURCE_DISTANCE_LIMIT: u32 = 2;
+const RESOURCE_DISTANCE_LIMIT: u32 = 5;
 const DEFAULT_DOT_STAKE: u64 = 5;
 /// Minimum number of blocks that must pass before another NFT asteroid can spawn
 const NFT_SPAWN_COOLDOWN_BLOCKS: u32 = 10;
@@ -98,9 +98,9 @@ pub enum AsteroidKind {
     Dot0 = 2,
     Dot1 = 3,
     Dot2 = 4,
-    Nft0 = 5,
-    Nft1 = 6,
-    Nft2 = 7,
+    Nft0 = 5, //Uncommon
+    Nft1 = 6, //Rare
+    Nft2 = 7, //Mystical
 }
 
 pub type AsteroidType = AsteroidKind;
@@ -126,6 +126,15 @@ pub mod pallet {
 
     #[pallet::storage]
     pub type Something<T> = StorageValue<_, u32>;
+
+    #[pallet::storage]
+    pub type MapSize<T> = StorageValue<_, u32>;
+
+    #[pallet::storage]
+    pub type MaxAsteroidsCount<T> = StorageValue<_, u32>;
+
+    #[pallet::storage]
+    pub type PlayersCount<T> = StorageValue<_, u32, ValueQuery>;
 
     // #[pallet::storage]
     //  pub type AsteroidIds<T> = StorageValue<_, u64, ValueQuery>;
@@ -236,12 +245,13 @@ pub mod pallet {
                 }
             }
 
-            let map_size: u32 = MAP_SIZE; // Moq map size
+            let map_size = MapSize::<T>::get().unwrap_or(MAP_SIZE);
 
             let asteroids_count = Asteroids::<T>::iter().count();
 
+            let max_asteroids_count = MaxAsteroidsCount::<T>::get().unwrap_or(MAX_ASTEROIDS_COUNT);
             let difference =
-                MAX_ASTEROIDS_COUNT.saturating_sub(asteroids_count.try_into().unwrap_or(0));
+                max_asteroids_count.saturating_sub(asteroids_count.try_into().unwrap_or(0));
 
             // One more constant I need to remove from here
             let ttl_const = ASTEROID_TTL_CONST;
@@ -307,6 +317,10 @@ pub mod pallet {
 
                     Self::deposit_event(Event::EnergyDepleted {
                         owner: owner.clone(),
+                    });
+
+                    PlayersCount::<T>::mutate(|player_count| {
+                        *player_count = player_count.saturating_sub(1);
                     });
                     continue;
                 }
@@ -437,6 +451,29 @@ pub mod pallet {
                 return Err(Error::<T>::NoneValue.into());
             }
 
+            let map_size = MapSize::<T>::get().unwrap_or(MAP_SIZE);
+            if coord.x >= map_size || coord.y >= map_size {
+                runtime_print!("[start_game] Coordinates are out of bounds: {:?}", coord);
+                return Err(Error::<T>::NoneValue.into());
+            }
+
+            // ! We decided not to require players to pay with Gold for participation,
+            // ! since Gold can serve better as a leaderboard score.
+            // ! Instead, we chose to use DOT for participation and created a dedicated DOT prize pool for this purpose.
+            // ! So while the logic of paying to participate remains, the project now uses a shared
+            // ! DOT pool to spawn DOT asteroids — which we believe is a better approach than requiring
+            // ! Gold for entry.
+            // let user_gold = AccountResources::<T>::get(&who, AsteroidKind::Dot0);
+            // let user_gold = AccountResources::<T>::get(&who, AsteroidKind::Gold);
+            // if user_gold < 20 {
+            //     runtime_print!(
+            //         "[start_game] Player does not have enough Gold: {:?}, has only {}",
+            //         who,
+            //         user_gold
+            //     );
+            //     return Err(Error::<T>::NoneValue.into());
+            // }
+
             if nft_skin != 0 {
                 let asteroid_kind = match nft_skin {
                     5 => AsteroidKind::Nft0,
@@ -479,6 +516,55 @@ pub mod pallet {
             });
             runtime_print!("[on_init] Active ship added {:?} coord: {:?}", who, coord);
 
+            PlayersCount::<T>::mutate(|player_count| {
+                *player_count = player_count.saturating_add(1);
+            });
+            Ok(())
+        }
+
+        // ! -------------------------------------------
+        // ! Admin calls are implemented to allow faster testing of the game with different parameters.
+        // ! That’s why they are not restricted at the moment.
+        #[pallet::call_index(4)]
+        #[pallet::weight(T::WeightInfo::do_something())]
+        pub fn admin_set_map_size(origin: OriginFor<T>, size: u32) -> DispatchResult {
+            MapSize::<T>::put(size);
+            runtime_print!("[set_map_size] Map size set to: {}", size);
+            Ok(())
+        }
+
+        #[pallet::call_index(5)]
+        #[pallet::weight(T::WeightInfo::do_something())]
+        pub fn admin_set_max_asteroids_count(origin: OriginFor<T>, count: u32) -> DispatchResult {
+            MaxAsteroidsCount::<T>::put(count);
+            runtime_print!(
+                "[set_max_asteroids_count] Max asteroids count set to: {}",
+                count
+            );
+            Ok(())
+        }
+
+        #[pallet::call_index(6)]
+        #[pallet::weight(T::WeightInfo::do_something())]
+        pub fn admin_reset_game(origin: OriginFor<T>) -> DispatchResult {
+            let map_size = MapSize::<T>::get().unwrap_or(MAP_SIZE);
+
+            for (owner, mut ship) in ActiveShips::<T>::iter() {
+                ship.energy = DEFAULT_ENERGY;
+                ship.pos = Coord { x: 0, y: 0 };
+
+                ActiveShips::<T>::insert(&owner, ship);
+                runtime_print!(
+                    "[admin_reset_game] Reset ship for {:?} to energy={} pos=(0,0)",
+                    owner,
+                    DEFAULT_ENERGY
+                );
+            }
+
+            for (user, _) in Flights::<T>::iter() {
+                Flights::<T>::remove(&user);
+                runtime_print!("[admin_reset_game] Cleared flight for {:?}", user);
+            }
             Ok(())
         }
     }
@@ -587,29 +673,29 @@ pub mod pallet {
             let last_nft_block = LastNftSpawnBlock::<T>::get();
 
             // Calculate the number of players
-            let players_count = ActiveShips::<T>::iter().count() as u32;
+            //let players_count = ActiveShips::<T>::iter().count() as u32;
+            let players_count = PlayersCount::<T>::get();
 
-            if roll < 5 && dot_emitted < pool_size / DOT_EMISSION_LIMIT_RATIO {
-                // 5% chance for Dot
-                if roll < 3 {
-                    AsteroidKind::Dot0 // 3% chance for Dot0
-                } else if roll == 3 {
-                    AsteroidKind::Dot1 // 1% chance for Dot1
+            if roll < 10 && dot_emitted < pool_size / DOT_EMISSION_LIMIT_RATIO {
+                // 10% chance for Dot
+                if roll < 5 {
+                    AsteroidKind::Dot0
+                } else if roll < 7 {
+                    AsteroidKind::Dot1
                 } else {
-                    AsteroidKind::Dot2 // 1% chance for Dot2
+                    AsteroidKind::Dot2
                 }
             } else if roll < 30 {
                 AsteroidKind::Energy
             } else if roll < 50 && block > last_nft_block + NFT_SPAWN_COOLDOWN_BLOCKS.into() {
-                if players_count < 3 {
-                    // 20% chance for NFT0 if there are less than 5 players
-                    AsteroidKind::Nft0
-                } else if players_count < 4 {
-                    // 10% chance for NFT1 if there are less than 10 players
+                // Here you can implement custom logic for NFT spawning.
+
+                if players_count > 2 {
+                    AsteroidKind::Nft2
+                } else if players_count > 1 {
                     AsteroidKind::Nft1
                 } else {
-                    // 5% chance for NFT2 if there are more than 10 players
-                    AsteroidKind::Nft2
+                    AsteroidKind::Nft0
                 }
             } else {
                 AsteroidKind::Gold
