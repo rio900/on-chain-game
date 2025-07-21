@@ -7,15 +7,16 @@
     <img src="static/logo.png" width="200" height="180" alt="Logo">
   </a>
 
-  <h3 align="center">DotStriker!</h3>
+  <h3 align="center">DotStriker! 🚀</h3>
 
   <p align="center">
-    Even aliens need financial backing to invade space! Challenge your friends to join your orbit and race to collect the most coins in the galaxy. Get Striking! 🚀
+    No shooting. No luck. Just speed, skill, and sync.
+    The Striker who collects the most, wins. 🏆
     <br />
     <a href="https://github.com/rio900/on-chain-game/blob/main/README.md"><strong>Explore the docs »</strong></a>
     <br />
     <br />
-    <a href="#gameplay-demo">View Demo</a>
+    <a href="#demo-experience-the-world-of-dotstriker">View Demo</a>
     &middot;
     <a href="#contributing">Contribute</a>
   </p>
@@ -25,59 +26,38 @@
 <details>
   <summary>Table of Contents</summary>
   <ol>
+    <li><a href="#-demo-experience-the-world-of-dotstriker">🎥 Demo: Experience the World of DotStriker!</a></li>
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
+        <li><a href="#game-features">Game Features</a></li>
+        <li><a href="#connecting-the-game-client">Connecting the Game Client</a></li>
         <li><a href="#built-with-">Built With ♡</a></li>
         <li><a href="#why-polkadot">Why Polkadot?</a></li>
       </ul>
     </li>
     <li>
-      <a href="#dotstriker-simulation-a-demo">DotStriker! Simulation: A Demo</a>
-      <ul>
-        <li><a href="#building-demo">Building DotStriker!</a></li>
-        <li><a href="#playing-dotstriker">Playing DotStriker!</a></li>
-      </ul>
-    </li>
-    <li><a href="#ui-design">UI Design</a></li>
+      <a href="#ui-design">UI Design</a>
       <ul>
         <li><a href="#screenshots">Screenshots</a></li>
         <li><a href="#wireframes">Wireframes</a></li>
       </ul>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#future-releases">Future Releases</a></li>
-    <li>
-      <a href="#meet-the-devs">Meet The Devs</a>
     </li>
+    <li><a href="#future-releases">Future Releases</a></li>
+    <li><a href="#meet-the-devs">Meet The Devs</a></li>
     <li><a href="#contributing">Contributing</a></li>
+    <li><a href="#contact">Contact</a></li>
     <li><a href="#acknowledgments">Acknowledgments</a></li>
   </ol>
 </details>
 
-## Running the Node and Testing the Game
-This repo contains the code for the Polkadot node with a custom game pallet. Follow the steps below to build and run the project locally, and connect the Unity client (https://github.com/rio900/game-client) for testing:
-1. Make sure Rust is installed, then build the project in release mode:
-cargo build --release
-2. Start the node. Launch the node in development mode with runtime logs:
-RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --execution=wasm
+<!-- DEMO -->
 
-You can now test the game using the Unity client. By default, it uses the Alice address. To test multiplayer or other addresses, the wallet must have some DOT tokens (0.15 DOT is enough).
-Steps to transfer DOT to a new wallet address:
-1. Get your client address. In the Unity client, click the DeviceID button on the main screen. This generates a wallet address based on the device ID.
-(By default, Alice’s address will be pre-filled.)
-2. Send DOT to that address. 
-  - Go to polkadot.js.org
-  - Connect to your local node
-  - From the Alice account, transfer DOT to the client address you just generated
+## 🎥 Demo: Experience the World of DotStriker!
 
-Once the transfer is complete and your client wallet has DOT, press DeviceID -> Ok in the client and you’re ready to play 🚀
-### 🎥 Demo: How DotStriker Works
+[Watch on YouTube](https://youtu.be/eu5RL829t_Q)
 
-Watch a short video demonstration of the project in action, showing real-time gameplay and on-chain integration:
-
-[![Watch the demo on YouTube](https://img.youtube.com/vi/KWXZ-tN-yCU/0.jpg)](https://youtu.be/KWXZ-tN-yCU?si=luYbPJj1YKvVDV7Z)
-
-👉 [Click here to watch on YouTube](https://youtu.be/KWXZ-tN-yCU?si=luYbPJj1YKvVDV7Z)
+<!-- DEMO -->
 
 <!-- ABOUT THE PROJECT -->
 
@@ -85,25 +65,176 @@ Watch a short video demonstration of the project in action, showing real-time ga
 
  <img src="static/screenshot_2.jpeg" alt="Gameplay">
 
-DotStriker! is a real-time, multiplayer coin race — pilots control on-chain ships, collect coins across the Polkadot-powered arena, and battle for dominance.
+DotStriker! is a lightning-fast, real-time multiplayer coin race where pilots command NFT starships in a fully on-chain Polkadot arena. Race across the grid, collecting rare NFTs, skins, and Polkdadroids that earn you real DOT, along with energy boosters to keep your ship fueled. When your ship runs out of fuel, the game ends. The player who gathers the most valuable collection wins. No shooting. No luck. Pure speed, skill, and flawless sync. DotStriker! flips Web3 gaming on its head by making the blockchain the game engine itself.
 
-No shooting. No luck. Just speed, skill, and sync.
-The Striker who collects the most, wins.
+Every move, every reward, every upgrade happens transparently on-chain ie. no servers, no middlemen. The Striker who collects the most coins claims victory. Ready to dominate the arena? 🚀
 
-Link to our presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnnrlCwj8/4VH96olgLoY4KJUq1WA7uA/view?utm_content=DAGnnrlCwj8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h8acaace07d)!
+Link to our first presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnnrlCwj8/4VH96olgLoY4KJUq1WA7uA/view?utm_content=DAGnnrlCwj8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h8acaace07d)!
 
+## Game Features
 
-Relevant connected repos for development:
-1. https://github.com/rio900/game-client
-2. https://github.com/sibra29/game-registration-contract
+DotStriker! isn’t just intended to be a great technical showcase. The ultimate goal is to design the game to be _fun_. We've carefully considered the setting, the motivations that keep players engaged, and how to design gameplay that’s rewarding and emotionally resonant.
 
-#### 🎮 Features:
+#### Visual Identity through NFTs
 
-- 🚀 Real-time multiplayer combat in a cosmic arena
-- 🪙 On-chain coin collection — every token counts toward your leaderboard rank
-- 🧠 Skill-based gameplay with responsive touch controls and quick-strike mechanics
-- 🛠 Wallet-native login with Polkadot identity
-- 🌐 Decentralized backend — game logic and player state live directly on-chain
+We use stylized, meme-inspired NFT ships to build emotional attachment. These visuals aren’t just cosmetic—they represent identity, rarity, and value. <br/>
+<img src="https://github.com/oyonika/dotstriker/blob/master/applications/coin_1.png?raw=true" width="150" height="140" alt="Meme coin">
+<img src="https://github.com/oyonika/dotstriker/blob/master/applications/coin_2.png?raw=true" width="150" height="140" alt="Meme coin">
+<img src="https://github.com/oyonika/dotstriker/blob/master/applications/coin_3.png?raw=true" width="150" height="140" alt="Meme coin"><br/>
+
+⚔️ **Real-Time Multiplayer Battles**  
+ Join a fast-paced arena where multiple players pilot NFT starships simultaneously, racing to collect coins, NFTs, and rewards.
+
+🔗 **Fully On-Chain Gameplay**  
+ Every move, collection, and upgrade happens transparently on the Polkadot blockchain—no servers, no cheats, no delays.
+
+💰 **Play-to-Earn Economy**  
+ Collect rare NFTs like skins and Polkdadroids that grant real DOT rewards. Fuel your ship with energy boosters to stay in the game.
+
+🚀 **Dynamic NFT Ships**  
+ Customize your starship’s appearance with unique, meme-inspired NFTs that reflect rarity and style.
+
+⚖️ **Risk & Reward Balance**  
+ Enter with DOT, collect scattered resources, and aim to exit with more than you started—real stakes, real gains.
+
+🛠️ **Serverless Experience**  
+ No backend, no off-chain APIs—the blockchain _is_ the game engine, ensuring trustless, secure gameplay.
+
+### ▶️ How to Play
+
+- Start by entering the arena with your NFT ship and fueling it with DOT.
+
+- Move your starship across a grid-based space map by initiating short “flights” between coordinates.
+
+- Pick up asteroids containing energy, gold, DOT tokens, or rare NFTs. Energy asteroids keep your ship fueled; if you run out, the game ends.
+
+- Use collected coins and NFTs to upgrade your ship, aiming to gather more than your opponents.
+
+- Your ship consumes energy each move. Keep collecting energy asteroids to stay active. If energy hits zero, you’re out.
+
+- The game ends when a player’s ship runs out of energy. Victory is achieved by collecting more DOT than initially staked, along with rare mystical NFTs, demonstrating superior resource management and strategy.
+
+### 👓 Gameplay For Nerds
+
+⏳ **On-Chain Game Loop**  
+ The pallet’s `on_initialize` hook runs every block to:
+
+- Finalize two-block flights (move ships).
+- Spawn and expire asteroids based on TTL and weighted randomness.
+- Deduct energy from all active ships.
+- Emit DOT and NFT asteroids respecting emission caps and cooldowns.
+- Remove ships with zero energy.
+
+🎲 **Asteroid Spawn Logic**  
+ Asteroids spawn probabilistically based on game state:
+
+- 10% chance for DOT asteroids
+- 20% chance for energy asteroids (restore ship fuel).
+- 20% chance for NFT asteroids (subject to cooldown and player count).
+- 50% chance for gold asteroids (default).
+
+📐 **Core Data Structures**
+
+- `Coord`: `(x, y)` grid position.
+- `Starship`: Position, energy, NFT skin.
+- `Flight`: Origin/destination and timing.
+- `AsteroidKind`: Resource types (Energy, Gold, DOT, NFT variants).
+
+💾 **Storage and State Management**
+
+- Tracks active ships, flights, asteroids, and player resources.
+- Controls emission counters to maintain economic balance.
+- Maintains player counts to dynamically adjust game mechanics.
+
+🕹️ **Player Actions (Extrinsics)**
+
+- `start_game(coord, nft_skin)`: Join and place your ship.
+- `start_flight(coord)`: Move to a new coordinate over 2 blocks.
+- `try_to_collect_resource(coord)`: Attempt to collect an asteroid.
+
+📊 **Economic and Strategic Mechanics**
+
+- DOT rewards capped to maintain scarcity.
+- NFT asteroid spawns respect cooldown timers and scale with player count.
+- Energy depletion per move requires strategic resource gathering.
+
+🎨 **NFT Visual Identity**
+
+- On-chain minted, meme-inspired ship skins add identity and value.
+- Dynamic asset minting occurs transparently and fully on-chain.
+
+#### On-Chain Incentives that Matter
+
+Players are driven by:
+
+- _Long-term goals_: Find and trade rare NFTs.
+- _Short-term goals_: Recover more DOT than they staked (e.g., enter with 5 DOT, aim to exit with 10).
+
+#### Gameplay Loop
+
+When a player joins with 5 DOT, that value is scattered as in-game resources across the map—alongside other players’ DOT. **The objective: collect your own and compete for others, all on-chain in real time.**
+
+This balance of visual appeal, risk, and real value makes DotStriker! a compelling on-chain game, not just a tech demo.
+
+## Connecting the Game Client
+
+This repository contains the Polkadot node with a custom game pallet. Follow the steps below to build and run the node locally, and connect the Unity client ([game-client](https://github.com/rio900/game-client)) for testing:
+
+---
+
+### Build the Project
+
+Make sure Rust is installed, then build the project in release mode:
+
+```bash
+cargo build --release
+```
+
+---
+
+### Start the Node
+
+Launch the node in development mode with runtime logs:
+
+```bash
+RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --execution=wasm
+```
+
+---
+
+### Test the Game with the Unity Client
+
+By default, the Unity client uses the Alice address.  
+To test multiplayer or a different wallet, that wallet must hold some DOT tokens. **0.15 DOT is sufficient.**
+
+---
+
+### Transfer DOT to a New Wallet Address
+
+To test with a new client wallet:
+
+- **Get the wallet address:**
+
+  - Open the Unity client.
+  - Click the `DeviceID` button on the main screen.
+  - This generates a wallet address from your device ID.
+  - (By default, Alice’s address is pre-filled.)
+
+- **Send DOT to that address:**
+  - Go to [polkadot.js.org](https://polkadot.js.org)
+  - Connect to your **local node**
+  - From the **Alice** account, transfer **0.15 DOT** to the generated client address
+
+---
+
+### Play the Game
+
+Once your client wallet has DOT:
+
+- Press `DeviceID → Ok` in the Unity client
+- You’re ready to play! 🚀
+
+#### Already played this game? Leave your feedback here: https://forms.gle/4eW91Xa2V3KFS3b46
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -137,30 +268,6 @@ Relevant connected repos for development:
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- DEMO -->
-
-## DotStriker! Simulation: A Demo
-
-### Building DotStriker!
-
-Watch our developers talk a little bit about the idea and how it was built:
-<br />
-<video src="https://youtube.com/shorts/fRfvrtR77ak" controls></video>
-<br />
-If you cannot see the preview on your browser, [here](https://youtube.com/shorts/fRfvrtR77ak) is the link.
-
-### Playing DotStriker!
-
-Watch a quick demo of how DotStriker works:
-<br />
-<video src="https://youtu.be/jCJ-B3NH390" controls></video>
-<br />
-If you cannot see the preview on your browser, [here](https://youtu.be/jCJ-B3NH390) is the link.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-<!-- DEMO -->
-
 ## UI Design
 
 ### Screenshots
@@ -176,20 +283,9 @@ Like many ambitious projects, Dotstrikers! began as a humble proof-of-concept na
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-<!-- ROADMAP -->
-
-## Roadmap
-
-Given that we only had 2 odd days to develop the entire project, we decided to do a MoSCoW style planning to outline what features we wanted to showcase:
-
-<img src="static/roadmap.png" alt="Team">
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 <!-- FUTURE RELEASES -->
 
 ## Future Releases
-
 
 <ul>
   <li><b>🪐 Polkadot Hub Integration: </b> Seamlessly connect to the Polkadot ecosystem to store in-game NFTs such as ships, themes, and achievements—secure, portable, and fully on-chain.</li>
@@ -206,28 +302,33 @@ Given that we only had 2 odd days to develop the entire project, we decided to d
 
 ## Meet The Devs
 
-<img src="static/team.jpeg" alt="Team">
+- **Team Name:** DotStriker!
+- **Contact Name:** Oyonika Samazder
+- **Contact Email:** oyonika@hotmail.com
 
-The team first connected at Consensus 2025, sparking a collaboration that led to the creation of DotStrikers!
-
-On our own, we do some pretty cool things too!
-
-Roman Samchuk
+**Roman Samchuk**
 <br />
 [![LinkedIn][LinkedIn]][LinkedIn-roman]
 [![GitHub][GitHub]][GitHub-roman]
 
-Oyonika Samazder
+**Oyonika Samazder**
 <br />
 [![LinkedIn][LinkedIn]][LinkedIn-oyonika]
 [![GitHub][GitHub]][GitHub-oyonika]
 
-Sami Ibrahim
-<br />
-[![LinkedIn][LinkedIn]][LinkedIn-sami]
-[![GitHub][GitHub]][GitHub-sami]
+### Team's experience
+
+The team first connected at Consensus 2025, sparking a collaboration that led to the creation of DotStriker! On our own, we do some pretty cool things too!
+
+Roman has over 14 years of software development experience, including several blockchain-related projects. He developed one of the first Libra blockchain transaction explorers, created a C# SDK for Move smart contracts, and built NFT smart contracts using OpenZeppelin.
+
+Oyonika is a software engineer with interests in cryptography and the cutting-edge world of blockchain. She enjoys designing secure protocols, optimizing on-chain logic, and building robust Web3 infrastructures. She has worked with both startups and established companies, turning ideas into full-stack applications by writing code, shipping features, and scaling systems from the ground up.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## 📅 Development Roadmap
+
+<img src="https://github.com/oyonika/dotstriker/blob/master/applications/roadmap.png?raw=true" width="600" alt="Roadmap">
 
 <!-- GETTING STARTED -->
 
