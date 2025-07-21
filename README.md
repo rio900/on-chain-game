@@ -54,6 +54,31 @@
   </ol>
 </details>
 
+## Running the Node and Testing the Game
+This repo contains the code for the Polkadot node with a custom game pallet. Follow the steps below to build and run the project locally, and connect the Unity client (https://github.com/rio900/game-client) for testing:
+1. Make sure Rust is installed, then build the project in release mode:
+cargo build --release
+2. Start the node. Launch the node in development mode with runtime logs:
+RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --execution=wasm
+
+You can now test the game using the Unity client. By default, it uses the Alice address. To test multiplayer or other addresses, the wallet must have some DOT tokens (0.15 DOT is enough).
+Steps to transfer DOT to a new wallet address:
+1. Get your client address. In the Unity client, click the DeviceID button on the main screen. This generates a wallet address based on the device ID.
+(By default, Alice’s address will be pre-filled.)
+2. Send DOT to that address. 
+  - Go to polkadot.js.org
+  - Connect to your local node
+  - From the Alice account, transfer DOT to the client address you just generated
+
+Once the transfer is complete and your client wallet has DOT, press DeviceID -> Ok in the client and you’re ready to play 🚀
+### 🎥 Demo: How DotStriker Works
+
+Watch a short video demonstration of the project in action, showing real-time gameplay and on-chain integration:
+
+[![Watch the demo on YouTube](https://img.youtube.com/vi/KWXZ-tN-yCU/0.jpg)](https://youtu.be/KWXZ-tN-yCU?si=luYbPJj1YKvVDV7Z)
+
+👉 [Click here to watch on YouTube](https://youtu.be/KWXZ-tN-yCU?si=luYbPJj1YKvVDV7Z)
+
 <!-- ABOUT THE PROJECT -->
 
 ## About The Project
