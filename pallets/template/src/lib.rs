@@ -21,7 +21,7 @@ const DEFAULT_ENERGY: u32 = 100;
 const ENERGY_DEPLETION_RATE: u32 = 2;
 const MAX_ASTEROIDS_COUNT: u32 = 30;
 const MAP_SIZE: u32 = 50;
-const ASTEROID_TTL_CONST: u32 = 25;
+const ASTEROID_TTL_CONST: u32 = 35;
 const RESOURCE_DISTANCE_LIMIT: u32 = 5;
 const DEFAULT_DOT_STAKE: u64 = 5;
 /// Minimum number of blocks that must pass before another NFT asteroid can spawn
