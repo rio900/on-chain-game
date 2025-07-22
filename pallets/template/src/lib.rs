@@ -25,9 +25,9 @@ const ASTEROID_TTL_CONST: u32 = 35;
 const RESOURCE_DISTANCE_LIMIT: u32 = 5;
 const DEFAULT_DOT_STAKE: u64 = 5;
 /// Minimum number of blocks that must pass before another NFT asteroid can spawn
-const NFT_SPAWN_COOLDOWN_BLOCKS: u32 = 10;
+const NFT_SPAWN_COOLDOWN_BLOCKS: u32 = 15;
 /// Maximum percentage of the DOT prize pool that can be emitted as DOT asteroids
-const DOT_EMISSION_LIMIT_RATIO: u64 = 10; // 10%
+const DOT_EMISSION_LIMIT_RATIO: u64 = 30; // 30%
 const ENERGY_ASTEROID_REWARD: u32 = 15;
 
 #[derive(
