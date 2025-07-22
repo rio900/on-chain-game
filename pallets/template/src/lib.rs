@@ -285,7 +285,7 @@ pub mod pallet {
 
                     // The pool size is the total amount of DOT deposited into the prize pool.
                     // The DOT emission limit ratio is the maximum percentage of the pool that can be emitted as
-                    let pool_size = DotPrizePool::<T>::get();
+                    let pool_size = 100; // DotPrizePool::<T>::get();
                     weight += T::DbWeight::get().reads(1);
                     let dot_emitted = DotEmittedTotal::<T>::get();
                     weight += T::DbWeight::get().reads(1);
@@ -774,12 +774,15 @@ pub mod pallet {
                 }
             }
             // Energy asteroid: 20% chance to spawn (roll 10–29).
-            else if roll < 50 {
+            else if roll < 50 && roll >= 30 {
                 AsteroidKind::Energy
             }
             // NFT asteroid: 20% chance to spawn (roll 30–49) only if cooldown period has passed.
             // The rarity depends on the number of active players.
-            else if roll < 70 && block > last_nft_block + NFT_SPAWN_COOLDOWN_BLOCKS.into() {
+            else if roll < 70
+                && roll >= 50
+                && block > last_nft_block + NFT_SPAWN_COOLDOWN_BLOCKS.into()
+            {
                 if players_count > 2 {
                     AsteroidKind::Nft2 // Mystical
                 } else if players_count > 1 {
