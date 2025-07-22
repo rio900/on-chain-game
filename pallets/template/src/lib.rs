@@ -403,7 +403,7 @@ pub mod pallet {
             let from_coord = ship_coord.pos.clone();
 
             let block_number = <frame_system::Pallet<T>>::block_number();
-            let end_block = block_number + 2u32.into();
+            let end_block = block_number + 1u32.into();
             Flights::<T>::insert(
                 who.clone(),
                 Flight {
