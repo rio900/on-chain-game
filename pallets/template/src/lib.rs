@@ -762,24 +762,24 @@ pub mod pallet {
             // Generate a pseudo-random number from 0 to 99 based on the provided index.
             let roll = get_random::<T>(100, index + 500); // 0–99
 
-            // DOT asteroid: 10% chance to spawn if not exceeding 10% of the current prize pool.
+            // DOT asteroid: 30% chance to spawn if not exceeding 30% of the current prize pool.
             // There are three DOT asteroid types, each with a different DOT reward: 1, 2, or 3 DOT.
-            if roll < 10 && dot_emitted < pool_size / DOT_EMISSION_LIMIT_RATIO {
-                if roll < 5 {
+            if roll < 30 && dot_emitted < pool_size / DOT_EMISSION_LIMIT_RATIO {
+                if roll < 15 {
                     AsteroidKind::Dot0 // 1 DOT
-                } else if roll < 7 {
+                } else if roll < 25 {
                     AsteroidKind::Dot1 // 2 DOT
                 } else {
                     AsteroidKind::Dot2 // 3 DOT
                 }
             }
             // Energy asteroid: 20% chance to spawn (roll 10–29).
-            else if roll < 30 {
+            else if roll < 50 {
                 AsteroidKind::Energy
             }
             // NFT asteroid: 20% chance to spawn (roll 30–49) only if cooldown period has passed.
             // The rarity depends on the number of active players.
-            else if roll < 50 && block > last_nft_block + NFT_SPAWN_COOLDOWN_BLOCKS.into() {
+            else if roll < 70 && block > last_nft_block + NFT_SPAWN_COOLDOWN_BLOCKS.into() {
                 if players_count > 2 {
                     AsteroidKind::Nft2 // Mystical
                 } else if players_count > 1 {
