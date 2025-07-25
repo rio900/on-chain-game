@@ -37,6 +37,9 @@
       </ul>
     </li>
     <li>
+      <a href="#live-testing-event">Live Testing Event</a>
+    </li>
+    <li>
       <a href="#ui-design">UI Design</a>
       <ul>
         <li><a href="#screenshots">Screenshots</a></li>
@@ -114,7 +117,7 @@ We use stylized, meme-inspired NFT ships to build emotional attachment. These vi
 
 - The game ends when a player’s ship runs out of energy. Victory is achieved by collecting more DOT than initially staked, along with rare mystical NFTs, demonstrating superior resource management and strategy.
 
-### 👓 Gameplay For Nerds
+### 🤓 Gameplay For Nerds
 
 ⏳ **On-Chain Game Loop**  
  The pallet’s `on_initialize` hook runs every block to:
@@ -205,7 +208,7 @@ RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --executio
 ### Test the Game with the Unity Client
 
 By default, the Unity client uses the Alice address.  
-To test multiplayer or a different wallet, that wallet must hold some DOT tokens. **0.15 DOT is sufficient.**
+To test multiplayer or a different wallet, that wallet must hold some DOT tokens. **0.15 DOT is sufficient for testing purposes.**
 
 ---
 
@@ -234,7 +237,13 @@ Once your client wallet has DOT:
 - Press `DeviceID → Ok` in the Unity client
 - You’re ready to play! 🚀
 
-#### Already played this game? Leave your feedback here: https://forms.gle/4eW91Xa2V3KFS3b46
+Game controls:
+
+1. Press the position on the screen you wish to move to.
+2. As the ship arrives at that point, collect as many cosmic spoils within the yellow range.
+3. Keep moving and looting until the time runs out!
+
+#### Beta tested this game? Leave your feedback here: https://forms.gle/4eW91Xa2V3KFS3b46
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -265,6 +274,18 @@ Once your client wallet has DOT:
 - 🎨 Unity powers a smooth, real-time visual experience while syncing with on-chain game state using custom networking bridges.
 
 - 📱 Designed for eventual deployment across Web, Desktop, and Mobile platforms with wallet integration and Polkadot identity.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Live Testing Event
+
+A group of 5 Polkadot enthusiasts gathered to playtest and review DotStriker! Each participant was registered using their unique device wallet address, enabling a fully decentralized experience without centralized logins. With all five players active, the on-chain engine scaled up in real time, spawning more asteroids, energy units, and resource-rich rewards. The higher player count also unlocked rarer events like NFT skins and Polkadroid drops. This created a chaotic, high-reward environment where players competed over DOT emissions and limited-edition collectibles, all governed by smart logic on the Polkadot blockchain.
+
+Watch the game session: https://youtube.com/shorts/NS_uqveu3jA?feature=share
+Watch a player POV: https://youtube.com/shorts/zE8X9ORPqMk?feature=share
+Game universe during gameplay for nerds 🤓: https://youtu.be/GnNEFIusZvE
+
+From the feedback, we saw a few things we can smooth out like making it easier to extend ship energy, adding better end screens or alerts when fuel is low, and bringing in music. Overall though, players really enjoyed the game, especially the competitive moments when everyone was racing to grab rare NFTs. Most said they’d play again and would tell their friends about it.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
