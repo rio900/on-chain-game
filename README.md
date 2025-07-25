@@ -72,7 +72,9 @@ DotStriker! is a lightning-fast, real-time multiplayer coin race where pilots co
 
 Every move, every reward, every upgrade happens transparently on-chain ie. no servers, no middlemen. The Striker who collects the most coins claims victory. Ready to dominate the arena? 🚀
 
-Link to our first presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnnrlCwj8/4VH96olgLoY4KJUq1WA7uA/view?utm_content=DAGnnrlCwj8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h8acaace07d)!
+Link to our first presentation at Consensus 2025 [here](https://www.canva.com/design/DAGnnrlCwj8/4VH96olgLoY4KJUq1WA7uA/view?utm_content=DAGnnrlCwj8&utm_campaign=designshare&utm_medium=link2&utm_source=uniquelinks&utlId=h8acaace07d).
+</br>
+You can also read about the game on Medium [here](https://oyonika.medium.com/dotstriker-building-a-fully-on-chain-multiplayer-space-game-on-polkadot-737b9c0ecb8e).
 
 ## Game Features
 
