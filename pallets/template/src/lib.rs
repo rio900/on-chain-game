@@ -566,10 +566,11 @@ pub mod pallet {
 
         // ! -------------------------------------------
         // ! Admin calls are implemented to allow faster testing of the game with different parameters.
-        // ! That’s why they are not restricted at the moment.
         #[pallet::call_index(4)]
         #[pallet::weight(T::WeightInfo::admin_set_map_size())]
         pub fn admin_set_map_size(origin: OriginFor<T>, size: u32) -> DispatchResult {
+            ensure_root(origin)?;
+
             MapSize::<T>::put(size);
             runtime_print!("[set_map_size] Map size set to: {}", size);
             Ok(())
@@ -578,6 +579,8 @@ pub mod pallet {
         #[pallet::call_index(5)]
         #[pallet::weight(T::WeightInfo::admin_set_max_asteroids_count())]
         pub fn admin_set_max_asteroids_count(origin: OriginFor<T>, count: u32) -> DispatchResult {
+            ensure_root(origin)?;
+
             MaxAsteroidsCount::<T>::put(count);
             runtime_print!(
                 "[set_max_asteroids_count] Max asteroids count set to: {}",
@@ -589,6 +592,8 @@ pub mod pallet {
         #[pallet::call_index(6)]
         #[pallet::weight(T::WeightInfo::admin_reset_game())]
         pub fn admin_reset_game(origin: OriginFor<T>) -> DispatchResult {
+            ensure_root(origin)?;
+
             for (owner, mut ship) in ActiveShips::<T>::iter() {
                 ship.energy = DEFAULT_ENERGY;
                 ship.pos = Coord { x: 0, y: 0 };
