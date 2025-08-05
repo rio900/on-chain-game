@@ -202,7 +202,7 @@ cargo build --release
 Launch the node in development mode with runtime logs:
 
 ```bash
-RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --execution=wasm
+RUST_LOG=runtime=debug ./target/release/dot-striker-node --dev --execution=wasm
 ```
 
 ---
@@ -381,7 +381,7 @@ git clone https://github.com/rio900/on-chain-game
    ```
 3. After building, you can start a local development node with runtime debug logging enabled:
    ```sh
-   RUST_LOG=runtime=debug ./target/release/solochain-template-node --dev --execution=wasm
+   RUST_LOG=runtime=debug ./target/release/dot-striker-node --dev --execution=wasm
    ```
 4. Once the node is running, you can interact with it using:
    • Polkadot.js Apps: Connect via https://polkadot.js.org/apps and select the local node.

@@ -225,7 +225,7 @@ mod runtime {
     #[runtime::pallet_index(6)]
     pub type Sudo = pallet_sudo;
 
-    // Include the custom logic from the pallet-template in the runtime.
+    // Include the custom logic from the pallet-dot-striker in the runtime.
     #[runtime::pallet_index(7)]
-    pub type Template = pallet_template;
+    pub type DotStriker = pallet_dot_striker;
 }

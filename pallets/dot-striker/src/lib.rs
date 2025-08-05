@@ -126,9 +126,6 @@ pub mod pallet {
     type UserAccount<T> = <T as frame_system::Config>::AccountId;
 
     #[pallet::storage]
-    pub type Something<T> = StorageValue<_, u32>;
-
-    #[pallet::storage]
     pub type MapSize<T> = StorageValue<_, u32>;
 
     #[pallet::storage]
@@ -176,10 +173,6 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        TestEvent {
-            something: u32,
-        },
-
         AsteroidSpawned {
             resource_id: AsteroidType,
             coord: Coord,
@@ -225,8 +218,15 @@ pub mod pallet {
 
     #[pallet::error]
     pub enum Error<T> {
-        NoneValue,
         StorageOverflow,
+        FlightAlreadyInProgress,
+        NoActiveShip,
+        ShipInFlight,
+        TooFarFromResource,
+        InvalidCoordinates,
+        PlayerAlreadyHasActiveShip,
+        InvalidNftSkin,
+        MissingNftForSkin,
     }
 
     #[pallet::hooks]
@@ -392,11 +392,11 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
 
             if Flights::<T>::contains_key(who.clone()) {
-                return Err(Error::<T>::NoneValue.into());
+                return Err(Error::<T>::FlightAlreadyInProgress.into());
             }
 
             if !ActiveShips::<T>::contains_key(who.clone()) {
-                return Err(Error::<T>::NoneValue.into());
+                return Err(Error::<T>::NoActiveShip.into());
             }
 
             let ship_coord = ActiveShips::<T>::get(who.clone()).unwrap();
@@ -428,26 +428,6 @@ pub mod pallet {
         }
 
         #[pallet::call_index(1)]
-        #[pallet::weight(T::WeightInfo::cause_error())]
-        pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
-            let _who = ensure_signed(origin)?;
-
-            // Read a value from storage.
-            match Something::<T>::get() {
-                // Return an error if the value has not been set.
-                None => Err(Error::<T>::NoneValue.into()),
-                Some(old) => {
-                    // Increment the value read from storage. This will cause an error in the event
-                    // of overflow.
-                    let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-                    // Update the value in storage with the incremented result.
-                    Something::<T>::put(new);
-                    Ok(())
-                }
-            }
-        }
-
-        #[pallet::call_index(2)]
         #[pallet::weight(T::WeightInfo::try_to_collect_resource())]
         pub fn try_to_collect_resource(origin: OriginFor<T>, coord: Coord) -> DispatchResult {
             // Ensure the call is signed and extract the caller's account
@@ -456,11 +436,11 @@ pub mod pallet {
             // The player cannot collect resources while their ship is in flight
             if Flights::<T>::contains_key(&who) {
                 runtime_print!("[try_to_collect_resource] Ship is still in flight");
-                return Err(Error::<T>::NoneValue.into());
+                return Err(Error::<T>::ShipInFlight.into());
             }
 
             // The player must have an active ship on the map
-            let ship_coord = ActiveShips::<T>::get(&who).ok_or(Error::<T>::NoneValue)?;
+            let ship_coord = ActiveShips::<T>::get(&who).ok_or(Error::<T>::NoActiveShip)?;
 
             // Calculate the Manhattan distance between the ship and the asteroid
             let distance = get_distance(ship_coord.pos.clone(), coord.clone());
@@ -470,7 +450,7 @@ pub mod pallet {
             "[try_to_collect_resource] Too far to collect resource at coord {:?}, distance: {}",
             coord, distance
         );
-                return Err(Error::<T>::NoneValue.into());
+                return Err(Error::<T>::TooFarFromResource.into());
             }
 
             // Collect the asteroid (adds resource and removes asteroid)
@@ -482,7 +462,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::call_index(3)]
+        #[pallet::call_index(2)]
         #[pallet::weight(T::WeightInfo::start_game())]
         pub fn start_game(origin: OriginFor<T>, coord: Coord, nft_skin: u32) -> DispatchResult {
             // Check that the extrinsic was signed and get the signer.
@@ -490,13 +470,13 @@ pub mod pallet {
 
             if ActiveShips::<T>::contains_key(who.clone()) {
                 runtime_print!("[start_game] Player already has an active ship: {:?}", who);
-                return Err(Error::<T>::NoneValue.into());
+                return Err(Error::<T>::PlayerAlreadyHasActiveShip.into());
             }
 
             let map_size = MapSize::<T>::get().unwrap_or(MAP_SIZE);
             if coord.x >= map_size || coord.y >= map_size {
                 runtime_print!("[start_game] Coordinates are out of bounds: {:?}", coord);
-                return Err(Error::<T>::NoneValue.into());
+                return Err(Error::<T>::InvalidCoordinates.into());
             }
 
             // ! We decided not to require players to pay with Gold for participation,
@@ -523,7 +503,7 @@ pub mod pallet {
                     7 => AsteroidKind::Nft2,
                     _ => {
                         runtime_print!("[start_game] Invalid nft_skin: {}", nft_skin);
-                        return Err(Error::<T>::NoneValue.into());
+                        return Err(Error::<T>::InvalidNftSkin.into());
                     }
                 };
 
@@ -533,7 +513,7 @@ pub mod pallet {
                         "[start_game] Player does not have the required NFT: {:?}",
                         asteroid_kind
                     );
-                    return Err(Error::<T>::NoneValue.into());
+                    return Err(Error::<T>::MissingNftForSkin.into());
                 }
             }
 
@@ -566,7 +546,7 @@ pub mod pallet {
 
         // ! -------------------------------------------
         // ! Admin calls are implemented to allow faster testing of the game with different parameters.
-        #[pallet::call_index(4)]
+        #[pallet::call_index(3)]
         #[pallet::weight(T::WeightInfo::admin_set_map_size())]
         pub fn admin_set_map_size(origin: OriginFor<T>, size: u32) -> DispatchResult {
             ensure_root(origin)?;
@@ -576,7 +556,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::call_index(5)]
+        #[pallet::call_index(4)]
         #[pallet::weight(T::WeightInfo::admin_set_max_asteroids_count())]
         pub fn admin_set_max_asteroids_count(origin: OriginFor<T>, count: u32) -> DispatchResult {
             ensure_root(origin)?;
@@ -589,7 +569,7 @@ pub mod pallet {
             Ok(())
         }
 
-        #[pallet::call_index(6)]
+        #[pallet::call_index(5)]
         #[pallet::weight(T::WeightInfo::admin_reset_game())]
         pub fn admin_reset_game(origin: OriginFor<T>) -> DispatchResult {
             ensure_root(origin)?;
